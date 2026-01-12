@@ -1,0 +1,8 @@
+#!/bin/bash
+
+## Description: Run npm dev with Vite server on --host
+## Usage: dev
+## Example: "ddev dev"
+
+# Run the npm dev command with the --host option
+ddev npm run dev -- --host

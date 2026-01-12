@@ -1,0 +1,7 @@
+#!/bin/bash
+
+## Description: Clear all Laravel caches (config, route, view, cache)
+## Usage: cc
+## Example: "ddev cc"
+
+ddev artisan optimize:clear
