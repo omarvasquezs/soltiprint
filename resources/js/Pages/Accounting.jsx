@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import {
     Calculator, FileText, ShoppingCart, Users, CreditCard, BarChart2
 } from 'lucide-react';
+import MainLayout from '@/Layouts/MainLayout';
 
 const Accounting = () => {
     const [financials, setFinancials] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch('/api/reports/financial')
+        fetch('/api/reports/accounting/financial-statement')
             .then(res => res.json())
             .then(data => {
                 setFinancials(data);
@@ -107,5 +108,7 @@ const Accounting = () => {
         </div>
     );
 };
+
+Accounting.layout = page => <MainLayout children={page} />;
 
 export default Accounting;
