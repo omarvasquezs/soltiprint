@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import MainLayout from '@/Layouts/MainLayout';
 import { Pencil, Trash2, Plus, Search, FileText } from 'lucide-react';
 
 const Quotes = () => {
@@ -119,5 +120,7 @@ const Quotes = () => {
         </div>
     );
 };
+
+Quotes.layout = page => <MainLayout children={page} />;
 
 export default Quotes;

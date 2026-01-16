@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import MainLayout from '@/Layouts/MainLayout';
 import { Pencil, Trash2, Plus, Search } from 'lucide-react';
 import Modal from '../Components/Modal';
 
@@ -253,5 +254,7 @@ const Machines = () => {
         </div>
     );
 };
+
+Machines.layout = page => <MainLayout children={page} />;
 
 export default Machines;

@@ -1,90 +1,67 @@
 import React from 'react';
-import { Users, FileText, Settings, Layers } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import MainLayout from '@/Layouts/MainLayout';
+import { Head, Link } from '@inertiajs/react';
+import { ShoppingCart, Users, Printer, Package, FileText, ClipboardList } from 'lucide-react';
 
-const Dashboard = () => {
+export default function Dashboard() {
     return (
-        <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-6">Escritorio</h1>
+        <div className="space-y-6">
+            <Head title="Dashboard" />
 
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
-                {/* Shortcuts */}
-                <Link to="/customers" className="bg-white overflow-hidden shadow rounded-lg p-6 hover:bg-gray-50 transition">
-                    <div className="flex items-center">
-                        <div className="flex-shrink-0">
-                            <Users className="h-8 w-8 text-gray-500" />
-                        </div>
-                        <div className="ml-5 w-0 flex-1">
-                            <h3 className="text-lg font-medium text-gray-900">Clientes</h3>
-                            <p className="mt-1 text-sm text-gray-500">Permite añadir nuevos clientes y gestionarlos.</p>
-                        </div>
+            <h1 className="text-2xl font-bold text-gray-900">Bienvenido a Logic Print</h1>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Modules */}
+                <Link href={route('quotes')} className="bg-white p-6 rounded-lg shadow hover:shadow-md transition border border-gray-200 flex flex-col items-center text-center group">
+                    <div className="p-3 rounded-full bg-blue-100 text-blue-600 mb-4 group-hover:bg-blue-600 group-hover:text-white transition">
+                        <FileText className="h-8 w-8" />
                     </div>
+                    <h3 className="text-lg font-semibold text-gray-900">Presupuestos</h3>
+                    <p className="text-sm text-gray-500 mt-2">Crear y gestionar cotizaciones para clientes.</p>
                 </Link>
 
-                <Link to="/quotes" className="bg-white overflow-hidden shadow rounded-lg p-6 hover:bg-gray-50 transition">
-                    <div className="flex items-center">
-                        <div className="flex-shrink-0">
-                            <FileText className="h-8 w-8 text-gray-500" />
-                        </div>
-                        <div className="ml-5 w-0 flex-1">
-                            <h3 className="text-lg font-medium text-gray-900">Presupuestos</h3>
-                            <p className="mt-1 text-sm text-gray-500">Permite preparar nuevos presupuestos y consultarlos.</p>
-                        </div>
+                <Link href={route('work-orders')} className="bg-white p-6 rounded-lg shadow hover:shadow-md transition border border-gray-200 flex flex-col items-center text-center group">
+                    <div className="p-3 rounded-full bg-indigo-100 text-indigo-600 mb-4 group-hover:bg-indigo-600 group-hover:text-white transition">
+                        <ClipboardList className="h-8 w-8" />
                     </div>
+                    <h3 className="text-lg font-semibold text-gray-900">Órdenes de Trabajo</h3>
+                    <p className="text-sm text-gray-500 mt-2">Seguimiento de producción y estados.</p>
                 </Link>
 
-                <Link to="/work-orders" className="bg-white overflow-hidden shadow rounded-lg p-6 hover:bg-gray-50 transition">
-                    <div className="flex items-center">
-                        <div className="flex-shrink-0">
-                            <Settings className="h-8 w-8 text-gray-500" />
-                        </div>
-                        <div className="ml-5 w-0 flex-1">
-                            <h3 className="text-lg font-medium text-gray-900">Órdenes de trabajo</h3>
-                            <p className="mt-1 text-sm text-gray-500">Permite gestionar produccion y OTs.</p>
-                        </div>
+                <Link href={route('machines')} className="bg-white p-6 rounded-lg shadow hover:shadow-md transition border border-gray-200 flex flex-col items-center text-center group">
+                    <div className="p-3 rounded-full bg-purple-100 text-purple-600 mb-4 group-hover:bg-purple-600 group-hover:text-white transition">
+                        <Printer className="h-8 w-8" />
                     </div>
+                    <h3 className="text-lg font-semibold text-gray-900">Máquinas</h3>
+                    <p className="text-sm text-gray-500 mt-2">Gestionar parque de maquinaria y costos.</p>
                 </Link>
 
-                <Link to="/materials" className="bg-white overflow-hidden shadow rounded-lg p-6 hover:bg-gray-50 transition">
-                    <div className="flex items-center">
-                        <div className="flex-shrink-0">
-                            <Layers className="h-8 w-8 text-gray-500" />
-                        </div>
-                        <div className="ml-5 w-0 flex-1">
-                            <h3 className="text-lg font-medium text-gray-900">Papeles y materiales</h3>
-                            <p className="mt-1 text-sm text-gray-500">Gestionar stock de papeles y tintas.</p>
-                        </div>
+                <Link href={route('materials')} className="bg-white p-6 rounded-lg shadow hover:shadow-md transition border border-gray-200 flex flex-col items-center text-center group">
+                    <div className="p-3 rounded-full bg-amber-100 text-amber-600 mb-4 group-hover:bg-amber-600 group-hover:text-white transition">
+                        <Package className="h-8 w-8" />
                     </div>
+                    <h3 className="text-lg font-semibold text-gray-900">Materiales</h3>
+                    <p className="text-sm text-gray-500 mt-2">Inventario de papeles, tintas y placas.</p>
                 </Link>
-            </div>
 
-            <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3">
-                <div className="bg-white overflow-hidden shadow rounded-lg">
-                    <div className="px-4 py-5 sm:p-6">
-                        <dt className="text-sm font-medium text-gray-500 truncate">OTs en producción</dt>
-                        <dd className="mt-1 text-3xl font-semibold text-gray-900">23</dd>
-                        <dd className="mt-1 text-sm text-yellow-600">S/ 35.064,67</dd>
+                <Link href={route('customers')} className="bg-white p-6 rounded-lg shadow hover:shadow-md transition border border-gray-200 flex flex-col items-center text-center group">
+                    <div className="p-3 rounded-full bg-green-100 text-green-600 mb-4 group-hover:bg-green-600 group-hover:text-white transition">
+                        <Users className="h-8 w-8" />
                     </div>
-                </div>
+                    <h3 className="text-lg font-semibold text-gray-900">Clientes</h3>
+                    <p className="text-sm text-gray-500 mt-2">Base de datos de clientes y contactos.</p>
+                </Link>
 
-                <div className="bg-white overflow-hidden shadow rounded-lg">
-                    <div className="px-4 py-5 sm:p-6">
-                        <dt className="text-sm font-medium text-gray-500 truncate">OTs completadas sin entregar</dt>
-                        <dd className="mt-1 text-3xl font-semibold text-gray-900">3</dd>
-                        <dd className="mt-1 text-sm text-green-600">S/ 3.902,25</dd>
+                <Link href={route('accounting')} className="bg-white p-6 rounded-lg shadow hover:shadow-md transition border border-gray-200 flex flex-col items-center text-center group">
+                    <div className="p-3 rounded-full bg-emerald-100 text-emerald-600 mb-4 group-hover:bg-emerald-600 group-hover:text-white transition">
+                        <ShoppingCart className="h-8 w-8" />
                     </div>
-                </div>
-
-                <div className="bg-white overflow-hidden shadow rounded-lg">
-                    <div className="px-4 py-5 sm:p-6">
-                        <dt className="text-sm font-medium text-gray-500 truncate">Recibos vencidos sin cobrar</dt>
-                        <dd className="mt-1 text-3xl font-semibold text-gray-900">2</dd>
-                        <dd className="mt-1 text-sm text-red-600">S/ 663,99</dd>
-                    </div>
-                </div>
+                    <h3 className="text-lg font-semibold text-gray-900">Contabilidad</h3>
+                    <p className="text-sm text-gray-500 mt-2">Facturación, gastos y proveedores.</p>
+                </Link>
             </div>
         </div>
     );
-};
+}
 
-export default Dashboard;
+Dashboard.layout = page => <MainLayout children={page} />;

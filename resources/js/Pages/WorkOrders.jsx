@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import MainLayout from '@/Layouts/MainLayout';
 import { Pencil, Trash2, Plus, Search, Settings } from 'lucide-react';
 
 const WorkOrders = () => {
@@ -109,5 +110,7 @@ const WorkOrders = () => {
         </div>
     );
 };
+
+WorkOrders.layout = page => <MainLayout children={page} />;
 
 export default WorkOrders;

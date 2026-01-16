@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus, Search } from 'lucide-react';
 import Modal from '../../Components/Modal';
+import MainLayout from '@/Layouts/MainLayout';
 
 const Invoices = () => {
     const [invoices, setInvoices] = useState([]);
@@ -370,5 +371,7 @@ const Invoices = () => {
         </div>
     );
 };
+
+Invoices.layout = page => <MainLayout children={page} />;
 
 export default Invoices;

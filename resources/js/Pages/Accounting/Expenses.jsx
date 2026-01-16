@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus, Search } from 'lucide-react';
 import Modal from '../../Components/Modal';
+import MainLayout from '@/Layouts/MainLayout';
 
 const Expenses = () => {
     const [expenses, setExpenses] = useState([]);
@@ -387,5 +388,7 @@ const Expenses = () => {
         </div>
     );
 };
+
+Expenses.layout = page => <MainLayout children={page} />;
 
 export default Expenses;

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus, Search } from 'lucide-react';
 import Modal from '../../Components/Modal';
+import MainLayout from '@/Layouts/MainLayout';
 
 const Suppliers = () => {
     const [suppliers, setSuppliers] = useState([]);
@@ -261,5 +262,7 @@ const Suppliers = () => {
         </div>
     );
 };
+
+Suppliers.layout = page => <MainLayout children={page} />;
 
 export default Suppliers;
