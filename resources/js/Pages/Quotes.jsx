@@ -1,10 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/Layouts/MainLayout';
 import { Pencil, Trash2, Plus, Search, FileText } from 'lucide-react';
+import Modal from '../Components/Modal';
 
 const Quotes = () => {
     const [quotes, setQuotes] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [currentQuote, setCurrentQuote] = useState(null);
+
+    const handleOpenModal = (quote = null) => {
+        setCurrentQuote(quote);
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setCurrentQuote(null);
+    };
 
     useEffect(() => {
         fetch('/api/quotes')
@@ -37,7 +50,10 @@ const Quotes = () => {
         <div>
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-900">Presupuestos</h1>
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center">
+                <button
+                    onClick={() => handleOpenModal()}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center"
+                >
                     <Plus className="h-5 w-5 mr-2" />
                     Nuevo Presupuesto
                 </button>
@@ -117,7 +133,26 @@ const Quotes = () => {
                     </div>
                 )}
             </div>
-        </div>
+
+            <Modal
+                show={isModalOpen}
+                onClose={handleCloseModal}
+                title={currentQuote ? 'Editar Presupuesto' : 'Nuevo Presupuesto'}
+            >
+                <div className="text-center py-4">
+                    <p className="text-gray-500">Funcionalidad de Presupuestos en desarrollo.</p>
+                </div>
+                <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+                    <button
+                        type="button"
+                        className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1 sm:mt-0"
+                        onClick={handleCloseModal}
+                    >
+                        Cerrar
+                    </button>
+                </div>
+            </Modal>
+        </div >
     );
 };
 
