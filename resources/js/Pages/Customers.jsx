@@ -22,10 +22,9 @@ const Customers = () => {
 
     const fetchCustomers = () => {
         setLoading(true);
-        fetch('/api/customers')
-            .then(response => response.json())
-            .then(data => {
-                setCustomers(data);
+        axios.get('/api/customers')
+            .then(response => {
+                setCustomers(response.data);
                 setLoading(false);
             })
             .catch(error => {
@@ -37,6 +36,7 @@ const Customers = () => {
     const handleOpenModal = (customer = null) => {
         if (customer) {
             setCurrentCustomer(customer);
+            // ...
             setFormData({
                 name: customer.name || '',
                 tax_id: customer.tax_id || '',
@@ -70,20 +70,9 @@ const Customers = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         const url = currentCustomer ? `/api/customers/${currentCustomer.id}` : '/api/customers';
-        const method = currentCustomer ? 'PUT' : 'POST';
+        const method = currentCustomer ? 'put' : 'post';
 
-        fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            },
-            body: JSON.stringify(formData),
-        })
-            .then(response => {
-                if (!response.ok) throw new Error('Error saving customer');
-                return response.json();
-            })
+        axios[method](url, formData)
             .then(() => {
                 fetchCustomers();
                 handleCloseModal();
@@ -93,11 +82,8 @@ const Customers = () => {
 
     const handleDelete = (id) => {
         if (confirm('¿Estás seguro de que quieres eliminar este cliente?')) {
-            fetch(`/api/customers/${id}`, {
-                method: 'DELETE',
-            })
-                .then(response => {
-                    if (!response.ok) throw new Error('Error deleting customer');
+            axios.delete(`/api/customers/${id}`)
+                .then(() => {
                     fetchCustomers();
                 })
                 .catch(error => console.error('Error:', error));
@@ -183,7 +169,7 @@ const Customers = () => {
             </div>
 
             <Modal
-                isOpen={isModalOpen}
+                show={isModalOpen}
                 onClose={handleCloseModal}
                 title={currentCustomer ? 'Editar Cliente' : 'Nuevo Cliente'}
             >
