@@ -218,7 +218,7 @@ const Invoices = () => {
             </div>
 
             <Modal
-                isOpen={isModalOpen}
+                show={isModalOpen}
                 onClose={handleCloseModal}
                 title={currentInvoice ? 'Editar Factura' : 'Nueva Factura'}
             >

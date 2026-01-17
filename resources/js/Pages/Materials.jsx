@@ -200,7 +200,7 @@ const Materials = () => {
             </div>
 
             <Modal
-                isOpen={isModalOpen}
+                show={isModalOpen}
                 onClose={handleCloseModal}
                 title={currentMaterial ? 'Editar Material' : 'Nuevo Material'}
             >

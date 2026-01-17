@@ -181,7 +181,7 @@ const Machines = () => {
             </div>
 
             <Modal
-                isOpen={isModalOpen}
+                show={isModalOpen}
                 onClose={handleCloseModal}
                 title={currentMachine ? 'Editar Máquina' : 'Nueva Máquina'}
             >

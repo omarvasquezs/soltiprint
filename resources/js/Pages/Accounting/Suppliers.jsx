@@ -186,7 +186,7 @@ const Suppliers = () => {
             </div>
 
             <Modal
-                isOpen={isModalOpen}
+                show={isModalOpen}
                 onClose={handleCloseModal}
                 title={currentSupplier ? 'Editar Proveedor' : 'Nuevo Proveedor'}
             >

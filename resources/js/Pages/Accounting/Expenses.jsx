@@ -219,7 +219,7 @@ const Expenses = () => {
             </div>
 
             <Modal
-                isOpen={isModalOpen}
+                show={isModalOpen}
                 onClose={handleCloseModal}
                 title={currentExpense ? 'Editar Gasto' : 'Registrar Gasto'}
             >
