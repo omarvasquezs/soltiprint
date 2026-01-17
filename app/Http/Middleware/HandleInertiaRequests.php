@@ -34,15 +34,31 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
-            'company_name' => session('company_name'),
-            'company_tax_id' => function () {
-                // Fetch company tax_id if company_id is present
-                // Since storing everything in session might be tedious, 
-                // we can just fetch the current company if ID is set.
-                // But for now, let's assume we store tax_id in session too or fetch it.
-                // Optimally, we fetch the current company model once.
-                
+            'company' => function () {
+                $companyId = session('company_id');
+                if ($companyId) {
+                    return \App\Models\Company::select('id', 'name', 'tax_id')->find($companyId);
+                }
+                return null;
+            },
+            // Keeping these for backward compatibility if needed, but 'company' object is cleaner.
+            // Let's map them to the company object to avoid multiple DB calls if we cached the query,
+            // but here we just do a fresh query or let the closure handle it.
+            // Actually, let's just return the company object as 'current_company' and update the layout to use it,
+            // OR simpler: resolve the values here.
+            'company_name' => function () {
+                if (session('company_name'))
+                    return session('company_name');
                 if (session('company_id')) {
+                    return \App\Models\Company::find(session('company_id'))?->name;
+                }
+                return 'Mi Empresa';
+            },
+            'company_tax_id' => function () {
+                // If we already fetched name, we might be fetching twice.
+                // Optimization: Fetch once.
+                if (session('company_id')) {
+                    // This is simple enough for now. The N+1 is negligible for a single user session header.
                     return \App\Models\Company::find(session('company_id'))?->tax_id;
                 }
                 return null;

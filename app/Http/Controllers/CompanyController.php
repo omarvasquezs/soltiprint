@@ -35,12 +35,13 @@ class CompanyController extends Controller
             ]);
 
             $user->companies()->attach($company->id, ['role' => 'owner']);
-            
+
             return $company;
         });
 
         // Auto select the new company
         session(['company_id' => $company->id]);
+        session(['company_name' => $company->name]);
 
         return redirect()->route('dashboard');
     }
