@@ -190,8 +190,13 @@ const Customers = () => {
                         <input
                             type="text"
                             name="tax_id"
-                            value={formData.tax_id}
-                            onChange={handleChange}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                if (/^\d*$/.test(value)) {
+                                    handleChange(e);
+                                }
+                            }}
+                            maxLength={11}
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
                         />
                     </div>

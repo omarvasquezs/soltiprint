@@ -17,7 +17,7 @@ class CustomerController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'tax_id' => 'nullable|string|max:20', // RUC/DNI
+            'tax_id' => 'nullable|numeric|digits_between:8,11', // RUC/DNI
             'email' => 'nullable|email',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
@@ -37,7 +37,7 @@ class CustomerController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'tax_id' => 'nullable|string|max:20',
+            'tax_id' => 'nullable|numeric|digits_between:8,11',
             'email' => 'nullable|email',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
