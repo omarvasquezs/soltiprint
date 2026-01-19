@@ -190,6 +190,7 @@ const Customers = () => {
                         <input
                             type="text"
                             name="tax_id"
+                            value={formData.tax_id}
                             onChange={(e) => {
                                 const value = e.target.value;
                                 if (/^\d*$/.test(value)) {
