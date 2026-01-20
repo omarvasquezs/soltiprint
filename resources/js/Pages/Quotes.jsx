@@ -3,6 +3,7 @@ import MainLayout from '@/Layouts/MainLayout';
 import { Pencil, Trash2, Plus, Search, FileText } from 'lucide-react';
 
 import Modal from '../Components/Modal';
+import QuoteWizard from '../Components/QuoteWizard';
 import { Head } from '@inertiajs/react';
 
 const Quotes = () => {
@@ -140,20 +141,9 @@ const Quotes = () => {
             <Modal
                 show={isModalOpen}
                 onClose={handleCloseModal}
-                title={currentQuote ? 'Editar Presupuesto' : 'Nuevo Presupuesto'}
+                maxWidth="3xl"
             >
-                <div className="text-center py-4">
-                    <p className="text-gray-500">Funcionalidad de Presupuestos en desarrollo.</p>
-                </div>
-                <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
-                    <button
-                        type="button"
-                        className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1 sm:mt-0"
-                        onClick={handleCloseModal}
-                    >
-                        Cerrar
-                    </button>
-                </div>
+                <QuoteWizard onClose={handleCloseModal} />
             </Modal>
         </div >
     );
