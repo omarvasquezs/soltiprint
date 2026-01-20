@@ -8,6 +8,7 @@ import { Head } from '@inertiajs/react';
 
 const Quotes = () => {
     const [quotes, setQuotes] = useState([]);
+    const [customers, setCustomers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentQuote, setCurrentQuote] = useState(null);
@@ -23,14 +24,17 @@ const Quotes = () => {
     };
 
     useEffect(() => {
-        fetch('/api/quotes')
-            .then(response => response.json())
-            .then(data => {
-                setQuotes(data);
+        Promise.all([
+            fetch('/api/quotes').then(res => res.json()),
+            fetch('/api/customers').then(res => res.json())
+        ])
+            .then(([quotesData, customersData]) => {
+                setQuotes(quotesData);
+                setCustomers(customersData);
                 setLoading(false);
             })
             .catch(error => {
-                console.error('Error fetching quotes:', error);
+                console.error('Error fetching data:', error);
                 setLoading(false);
             });
     }, []);
@@ -143,7 +147,7 @@ const Quotes = () => {
                 onClose={handleCloseModal}
                 maxWidth="3xl"
             >
-                <QuoteWizard onClose={handleCloseModal} />
+                <QuoteWizard onClose={handleCloseModal} customers={customers} />
             </Modal>
         </div >
     );
