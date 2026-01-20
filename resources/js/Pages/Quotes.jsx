@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/Layouts/MainLayout';
 import { Pencil, Trash2, Plus, Search, FileText } from 'lucide-react';
+
 import Modal from '../Components/Modal';
+import { Head } from '@inertiajs/react';
 
 const Quotes = () => {
     const [quotes, setQuotes] = useState([]);
@@ -48,6 +50,7 @@ const Quotes = () => {
 
     return (
         <div>
+            <Head title="Presupuestos" />
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-900">Presupuestos</h1>
                 <button
