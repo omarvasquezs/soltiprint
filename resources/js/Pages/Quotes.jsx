@@ -145,7 +145,7 @@ const Quotes = () => {
             <Modal
                 show={isModalOpen}
                 onClose={handleCloseModal}
-                maxWidth="3xl"
+                maxWidth="7xl"
             >
                 <QuoteWizard onClose={handleCloseModal} customers={customers} />
             </Modal>

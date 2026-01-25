@@ -4,6 +4,7 @@ import {
     Transition,
     TransitionChild,
 } from '@headlessui/react';
+import { X } from 'lucide-react';
 
 export default function Modal({
     children,
@@ -24,6 +25,11 @@ export default function Modal({
         lg: 'sm:max-w-lg',
         xl: 'sm:max-w-xl',
         '2xl': 'sm:max-w-2xl',
+        '3xl': 'sm:max-w-3xl',
+        '4xl': 'sm:max-w-4xl',
+        '5xl': 'sm:max-w-5xl',
+        '6xl': 'sm:max-w-6xl',
+        '7xl': 'sm:max-w-7xl',
     }[maxWidth];
 
     return (
@@ -54,8 +60,13 @@ export default function Modal({
                     leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                 >
                     <DialogPanel
-                        className={`mb-6 transform overflow-hidden rounded-lg bg-white shadow-xl transition-all sm:mx-auto sm:w-full ${maxWidthClass} p-6`}
+                        className={`relative mb-6 transform overflow-hidden rounded-lg bg-white shadow-xl transition-all sm:mx-auto sm:w-full ${maxWidthClass} p-6`}
                     >
+                        {closeable && (
+                            <button onClick={close} className="absolute right-4 top-4 text-gray-400 hover:text-gray-500 focus:outline-none">
+                                <X className="h-6 w-6" />
+                            </button>
+                        )}
                         {children}
                     </DialogPanel>
                 </TransitionChild>
