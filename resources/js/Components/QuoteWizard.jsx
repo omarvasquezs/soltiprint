@@ -5,7 +5,7 @@ const QuoteWizard = ({ onClose, customers = [] }) => {
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
         workType: 'general',
-        format: 'A4',
+        format: '',
         customFormat: '',
         componentName: 'Impresión',
         pages: '',
@@ -137,6 +137,23 @@ const QuoteWizard = ({ onClose, customers = [] }) => {
     const filteredCustomers = customers.filter(customer =>
         customer.name.toLowerCase().includes(formData.customerSearch.toLowerCase())
     );
+
+    const isNextDisabled = () => {
+        if (step === 2 && (formData.workType === 'general' || formData.workType === 'plotter' || formData.workType === 'copies')) {
+            return !formData.format || (formData.format === 'custom' && !formData.customFormat);
+        }
+        if (step === 3 && formData.workType === 'general') {
+            return !formData.inks;
+        }
+        if (step === 4 && formData.workType === 'general') {
+            return !formData.paperType;
+        }
+        if (step === 5 && formData.workType === 'general') {
+            return !formData.pressFormat || formData.pressFormat === '<Propose>' ||
+                !formData.printingMachine || formData.printingMachine === '<Propose>';
+        }
+        return false;
+    };
 
     const getStepTitle = () => {
         if (step === 1) return 'Preparar nuevo presupuesto';
@@ -626,7 +643,11 @@ const QuoteWizard = ({ onClose, customers = [] }) => {
                     </button>
                     <button
                         onClick={handleNext}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium flex items-center"
+                        disabled={isNextDisabled()}
+                        className={`px-4 py-2 rounded-md text-sm font-medium flex items-center ${isNextDisabled()
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                            }`}
                     >
                         {step === 2 && formData.workType === 'free' ? 'Terminar' : (step === 3 && formData.workType === 'general' ? 'Siguiente >>' : (step === 4 && formData.workType === 'general' ? 'Siguiente >>' : (step === 5 && formData.workType === 'general' ? 'Siguiente >>' : 'Siguiente >>')))}
                     </button>
