@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
-import { Printer, BookOpen, Layers, Image as ImageIcon, Copy, FileQuestion } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Printer, BookOpen, Layers, Image as ImageIcon, Copy, FileQuestion, ChevronDown } from 'lucide-react';
 
-const QuoteWizard = ({ onClose, customers = [] }) => {
+const QuoteWizard = ({
+    onClose,
+    customers = [],
+    machines = [],
+    materials = []
+}) => {
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
         workType: 'general',
@@ -20,7 +25,24 @@ const QuoteWizard = ({ onClose, customers = [] }) => {
         paperDimensions: '<Propose>',
         pressFormat: '<Propose>',
         printingMachine: '<Propose>',
+        pressFormat: '<Propose>',
+        printingMachine: '<Propose>',
     });
+
+    const [isPaperDropdownOpen, setIsPaperDropdownOpen] = useState(false);
+    const paperDropdownRef = useRef(null);
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (paperDropdownRef.current && !paperDropdownRef.current.contains(event.target)) {
+                setIsPaperDropdownOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     const handleNext = () => {
         if (step === 1) {
@@ -133,10 +155,99 @@ const QuoteWizard = ({ onClose, customers = [] }) => {
         return [...options, ...others].sort((a, b) => a - b);
     };
 
+    // Standard papers library based on Logic Print behavior (Extracted from user screenshots)
+    const STANDARD_PAPERS = {
+        'Acid Free': { grammages: [75, 90, 115, 120], sizes: ['61x86', '70x100'] },
+        'Archival': { grammages: [80, 100, 120], sizes: ['70x100'] },
+        'ArtBoard Gloss': { grammages: [200, 250, 300, 350], sizes: ['70x100', '72x102'] },
+        'ArtBoard Matt': { grammages: [200, 250, 300, 350], sizes: ['70x100', '72x102'] },
+        'ArtPaper Matt': { grammages: [90, 115, 130, 150, 170], sizes: ['61x86', '70x100'] },
+        'Bible': { grammages: [35, 40, 45, 50], sizes: ['70x100'] },
+        'BOND': { grammages: [60, 70, 75, 80, 90, 100, 115, 120], sizes: ['61x86', '70x100', '72x102'] },
+        'Book': { grammages: [60, 70, 80, 90], sizes: ['61x86', '70x100'] },
+        'Bristol': { grammages: [180, 220, 240, 260], sizes: ['70x100', '72x102'] },
+        'Carbonless Blue Botton': { grammages: [50, 56, 60], sizes: ['61x86', '72x102'] },
+        'Carbonless Blue Middle': { grammages: [50, 56, 60], sizes: ['61x86', '72x102'] },
+        'Carbonless Fuchsia Botton': { grammages: [50, 56, 60], sizes: ['61x86', '72x102'] },
+        'Carbonless Fuchsia Middle': { grammages: [50, 56, 60], sizes: ['61x86', '72x102'] },
+        'Carbonless Green Botton': { grammages: [50, 56, 60], sizes: ['61x86', '72x102'] },
+        'Carbonless Green Middle': { grammages: [50, 56, 60], sizes: ['61x86', '72x102'] },
+        'Carbonless White Botton': { grammages: [50, 56, 60], sizes: ['61x86', '72x102'] },
+        'Carbonless White Middle': { grammages: [50, 56, 60], sizes: ['61x86', '72x102'] },
+        'Carbonless White Top': { grammages: [50, 56, 60], sizes: ['61x86', '72x102'] },
+        'Carbonless Yellow Botton': { grammages: [50, 56, 60], sizes: ['61x86', '72x102'] },
+        'Carbonless Yellow Middle': { grammages: [50, 56, 60], sizes: ['61x86', '72x102'] },
+        'Catalog': { grammages: [115, 130, 150, 170], sizes: ['70x100'] },
+        'Coated': { grammages: [90, 115, 130, 150], sizes: ['61x86', '70x100'] },
+        'Cover': { grammages: [200, 250, 300], sizes: ['70x100'] },
+        'Folcote': { grammages: [210, 225, 240, 260, 280, 300, 320, 350], sizes: ['72x102'] },
+        'Generic': { grammages: [0, 60, 80, 200], sizes: ['70x100'] },
+        'Index': { grammages: [90, 120, 150, 180], sizes: ['70x100'] },
+        'Ledger': { grammages: [90, 120, 150], sizes: ['70x100'] },
+        'Mimeo': { grammages: [70, 75, 80], sizes: ['61x86', '70x100'] },
+        'Newsprint': { grammages: [45, 48, 52], sizes: ['61x86', '70x100'] },
+        'Photocopy paper A3': { grammages: [75, 80], sizes: ['29.7x42'] },
+        'Rag': { grammages: [80, 90, 100], sizes: ['70x100'] },
+        'Splendorgel': { grammages: [100, 120, 140, 160, 230, 270, 300], sizes: ['72x102'] },
+        'Tag': { grammages: [150, 180, 200, 240], sizes: ['70x100'] },
+        'Text': { grammages: [75, 90, 115, 125], sizes: ['61x86', '70x100'] },
+        // Rolls
+        'CANVAS ROLL - 5 METERS WIDTH': { grammages: [300, 350], sizes: ['500x1000'] },
+        'ROLL BOND': { grammages: [75, 80, 90], sizes: ['61x1000', '90x1000'] },
+        'ROLL LABELS 10x13.5 IN 3 COLUMNS': { grammages: [80, 90], sizes: ['25.4x1000'] },
+        'ROLL VINILE 3 m wide': { grammages: [100, 120, 150], sizes: ['300x1000'] },
+    };
+
     // Filter customers based on search input
     const filteredCustomers = customers.filter(customer =>
         customer.name.toLowerCase().includes(formData.customerSearch.toLowerCase())
     );
+
+    // Dynamic filtering for Step 4 (Paper)
+    const availablePapers = Array.from(new Set([
+        ...Object.keys(STANDARD_PAPERS),
+        ...materials.filter(m => m.type === 'paper').map(m => m.name)
+    ])).sort();
+
+    const getGrammagesForPaper = (paperName) => {
+        const dbGrammages = materials
+            .filter(m => m.type === 'paper' && m.name === paperName)
+            .map(m => m.grammage)
+            .filter(Boolean);
+
+        const stdGrammages = STANDARD_PAPERS[paperName]?.grammages || [];
+        const uniqueGrammages = Array.from(new Set([...dbGrammages, ...stdGrammages]));
+
+        return ['<Unidades>', '<Buscar>', '<->', ...uniqueGrammages.sort((a, b) => a - b)];
+    };
+
+    const getDimensionsForPaper = (paperName) => {
+        const dbDims = materials
+            .filter(m => m.type === 'paper' && m.name === paperName)
+            .map(m => `${m.width_mm / 10}x${m.height_mm / 10}`)
+            .filter(d => d !== '0x0');
+
+        const stdDims = STANDARD_PAPERS[paperName]?.sizes || [];
+        const uniqueDims = Array.from(new Set([...dbDims, ...stdDims]));
+
+        return ['<Unidades>', '<Propose>', ...uniqueDims];
+    };
+
+    // Dynamic filtering for Step 5 (Print)
+    const getMachinesForFormat = (formatStr) => {
+        if (!formatStr || formatStr === '<Propose>') return machines;
+
+        // Parse format like "70x100" (cm) to mm
+        const parts = formatStr.split('x').map(p => parseFloat(p) * 10);
+        if (parts.length !== 2) return machines;
+
+        const [w, h] = parts;
+        return machines.filter(m => {
+            if (!m.max_width_mm || !m.max_height_mm) return true; // Show machines without constraints
+            // Check both orientations
+            return (m.max_width_mm >= w && m.max_height_mm >= h) || (m.max_width_mm >= h && m.max_height_mm >= w);
+        });
+    };
 
     const isNextDisabled = () => {
         if (step === 2 && (formData.workType === 'general' || formData.workType === 'plotter' || formData.workType === 'copies')) {
@@ -513,22 +624,83 @@ const QuoteWizard = ({ onClose, customers = [] }) => {
                                 {/* Paper Type */}
                                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
                                     <label className="lg:col-span-3 font-bold text-gray-800 text-sm lg:text-base">Papel o soporte:</label>
-                                    <div className="lg:col-span-4 relative">
-                                        <input
-                                            type="text"
-                                            list="paperTypes"
-                                            value={formData.paperType}
-                                            onChange={(e) => setFormData({ ...formData, paperType: e.target.value })}
-                                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
-                                        />
-                                        <datalist id="paperTypes">
-                                            {paperTypes.map(p => (
-                                                <option key={p} value={p} />
-                                            ))}
-                                        </datalist>
-                                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                            {/* Search icon placeholder which is usually part of browser datalist but adding visual cue if needed */}
+                                    <div className="lg:col-span-4 relative" ref={paperDropdownRef}>
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                value={formData.paperType}
+                                                placeholder="Escriba o seleccione un papel..."
+                                                onChange={(e) => {
+                                                    const newVal = e.target.value;
+                                                    setFormData({
+                                                        ...formData,
+                                                        paperType: newVal,
+                                                        grammage: '<Search>',
+                                                        paperDimensions: '<Propose>'
+                                                    });
+                                                    setIsPaperDropdownOpen(true);
+                                                }}
+                                                onFocus={() => setIsPaperDropdownOpen(true)}
+                                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 pr-10"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsPaperDropdownOpen(!isPaperDropdownOpen)}
+                                                className="absolute inset-y-0 right-0 px-2 flex items-center text-gray-400 hover:text-gray-600"
+                                            >
+                                                <ChevronDown className="h-4 w-4" />
+                                            </button>
                                         </div>
+
+                                        {isPaperDropdownOpen && (
+                                            <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                                                {(() => {
+                                                    const isExactMatch = availablePapers.includes(formData.paperType);
+                                                    const filtered = isExactMatch
+                                                        ? availablePapers
+                                                        : availablePapers.filter(p =>
+                                                            !formData.paperType ||
+                                                            p.toLowerCase().includes(formData.paperType.toLowerCase())
+                                                        );
+
+                                                    if (filtered.length === 0) {
+                                                        return (
+                                                            <li className="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-500 italic">
+                                                                No se encontraron resultados
+                                                            </li>
+                                                        );
+                                                    }
+
+                                                    return filtered.map(p => (
+                                                        <li
+                                                            key={p}
+                                                            className={`relative cursor-default select-none py-2 pl-3 pr-9 hover:bg-blue-100 text-gray-900 ${formData.paperType === p ? 'bg-blue-50 font-medium' : ''}`}
+                                                            onClick={() => {
+                                                                setFormData({
+                                                                    ...formData,
+                                                                    paperType: p,
+                                                                    grammage: '<Search>',
+                                                                    paperDimensions: '<Propose>'
+                                                                });
+                                                                setIsPaperDropdownOpen(false);
+                                                            }}
+                                                        >
+                                                            {p}
+                                                        </li>
+                                                    ));
+                                                })()}
+                                            </ul>
+                                        )}
+                                        {/* Simplified Logic for List Rendering: Always show filtered list, BUT if user clicks chevron, toggle open. 
+                                            The issue is standard behavior: if I type 'B', I see 'Bond'. If I click chevron, I want to see 'Acid Free', 'Bond', etc?
+                                            Let's implement: If I am editing, filter. If I am just viewing (exact match), show all?
+                                            Better: Show all availablePapers if Filtered list is empty? No.
+                                            Let's just show filtered list. If user wants to see all, they delete text. 
+                                            Wait, "hasta que no borre el contenido". 
+                                            How about a "Clear" button?
+                                            Or: If the input matches a valid option EXACTLY, show ALL options? 
+                                            Let's try: If (exact match) -> Show All. Else -> Show Filtered.
+                                        */}
                                     </div>
                                     <div className="lg:col-span-5 text-sm text-gray-500 italic">
                                         Elija de la lista, o escriba, el tipo de papel o soporte. <br />
@@ -545,7 +717,7 @@ const QuoteWizard = ({ onClose, customers = [] }) => {
                                             onChange={(e) => setFormData({ ...formData, grammage: e.target.value })}
                                             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
                                         >
-                                            {grammages.map(g => (
+                                            {getGrammagesForPaper(formData.paperType).map(g => (
                                                 <option key={g} value={g}>{g}</option>
                                             ))}
                                         </select>
@@ -564,7 +736,7 @@ const QuoteWizard = ({ onClose, customers = [] }) => {
                                             onChange={(e) => setFormData({ ...formData, paperDimensions: e.target.value })}
                                             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
                                         >
-                                            {paperDimensionsList.map(d => (
+                                            {getDimensionsForPaper(formData.paperType).map(d => (
                                                 <option key={d} value={d}>{d}</option>
                                             ))}
                                         </select>
@@ -621,8 +793,9 @@ const QuoteWizard = ({ onClose, customers = [] }) => {
                                                 onChange={(e) => setFormData({ ...formData, printingMachine: e.target.value })}
                                                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
                                             >
-                                                {printingMachineOptions.map(opt => (
-                                                    <option key={opt} value={opt}>{opt}</option>
+                                                <option value="<Propose>">&lt;Propose&gt;</option>
+                                                {getMachinesForFormat(formData.pressFormat).map(m => (
+                                                    <option key={m.id} value={m.name}>{m.name}</option>
                                                 ))}
                                             </select>
                                             <p className="text-sm text-gray-500 italic">Muestra las máquinas configuradas actualmente. Si no ha introducido los datos de sus máquinas, se mostrarán algunas por defecto.</p>

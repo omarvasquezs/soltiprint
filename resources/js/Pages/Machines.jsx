@@ -12,7 +12,9 @@ const Machines = () => {
         name: '',
         type: 'offset',
         hourly_rate: '',
-        description: ''
+        description: '',
+        max_width_mm: '',
+        max_height_mm: ''
     });
 
     useEffect(() => {
@@ -41,6 +43,8 @@ const Machines = () => {
                 type: machine.type || 'offset',
                 hourly_rate: machine.hourly_rate || '',
                 description: machine.description || '',
+                max_width_mm: machine.max_width_mm || '',
+                max_height_mm: machine.max_height_mm || '',
             });
         } else {
             setCurrentMachine(null);
@@ -48,7 +52,9 @@ const Machines = () => {
                 name: '',
                 type: 'offset',
                 hourly_rate: '',
-                description: ''
+                description: '',
+                max_width_mm: '',
+                max_height_mm: ''
             });
         }
         setIsModalOpen(true);
@@ -223,6 +229,30 @@ const Machines = () => {
                             required
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
                         />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Ancho Máximo (mm)</label>
+                            <input
+                                type="number"
+                                name="max_width_mm"
+                                value={formData.max_width_mm}
+                                onChange={handleChange}
+                                placeholder="Ej: 720"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Largo Máximo (mm)</label>
+                            <input
+                                type="number"
+                                name="max_height_mm"
+                                value={formData.max_height_mm}
+                                onChange={handleChange}
+                                placeholder="Ej: 1020"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                            />
+                        </div>
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Descripción</label>

@@ -9,6 +9,8 @@ import { Head } from '@inertiajs/react';
 const Quotes = () => {
     const [quotes, setQuotes] = useState([]);
     const [customers, setCustomers] = useState([]);
+    const [machines, setMachines] = useState([]);
+    const [materials, setMaterials] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentQuote, setCurrentQuote] = useState(null);
@@ -26,11 +28,15 @@ const Quotes = () => {
     useEffect(() => {
         Promise.all([
             fetch('/api/quotes').then(res => res.json()),
-            fetch('/api/customers').then(res => res.json())
+            fetch('/api/customers').then(res => res.json()),
+            fetch('/api/machines').then(res => res.json()),
+            fetch('/api/materials').then(res => res.json())
         ])
-            .then(([quotesData, customersData]) => {
+            .then(([quotesData, customersData, machinesData, materialsData]) => {
                 setQuotes(quotesData);
                 setCustomers(customersData);
+                setMachines(machinesData);
+                setMaterials(materialsData);
                 setLoading(false);
             })
             .catch(error => {
@@ -147,7 +153,12 @@ const Quotes = () => {
                 onClose={handleCloseModal}
                 maxWidth="7xl"
             >
-                <QuoteWizard onClose={handleCloseModal} customers={customers} />
+                <QuoteWizard
+                    onClose={handleCloseModal}
+                    customers={customers}
+                    machines={machines}
+                    materials={materials}
+                />
             </Modal>
         </div >
     );

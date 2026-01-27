@@ -22,6 +22,8 @@ class MachineController extends Controller
             'setup_time' => 'nullable|numeric|min:0', // in minutes
             'click_cost_bw' => 'nullable|numeric|min:0',
             'click_cost_color' => 'nullable|numeric|min:0',
+            'max_width_mm' => 'nullable|integer|min:0',
+            'max_height_mm' => 'nullable|integer|min:0',
         ]);
 
         $machine = Machine::create($validated);
@@ -43,6 +45,8 @@ class MachineController extends Controller
             'setup_time' => 'nullable|numeric|min:0',
             'click_cost_bw' => 'nullable|numeric|min:0',
             'click_cost_color' => 'nullable|numeric|min:0',
+            'max_width_mm' => 'nullable|integer|min:0',
+            'max_height_mm' => 'nullable|integer|min:0',
         ]);
 
         $machine->update($validated);

@@ -21,6 +21,9 @@ class MaterialController extends Controller
             'cost_per_unit' => 'required|numeric|min:0',
             'unit' => 'required|string|max:50', // e.g., 'sheet', 'kg', 'liter'
             'stock_quantity' => 'integer|min:0',
+            'grammage' => 'nullable|integer|min:0',
+            'width_mm' => 'nullable|integer|min:0',
+            'height_mm' => 'nullable|integer|min:0',
         ]);
 
         $material = Material::create($validated);
@@ -41,6 +44,9 @@ class MaterialController extends Controller
             'cost_per_unit' => 'required|numeric|min:0',
             'unit' => 'required|string|max:50',
             'stock_quantity' => 'integer|min:0',
+            'grammage' => 'nullable|integer|min:0',
+            'width_mm' => 'nullable|integer|min:0',
+            'height_mm' => 'nullable|integer|min:0',
         ]);
 
         $material->update($validated);

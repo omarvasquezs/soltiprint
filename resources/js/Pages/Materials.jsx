@@ -14,7 +14,10 @@ const Materials = () => {
         unit: 'millar',
         cost_per_unit: '',
         stock_quantity: 0,
-        supplier_id: ''
+        supplier_id: '',
+        grammage: '',
+        width_mm: '',
+        height_mm: ''
     });
     const [suppliers, setSuppliers] = useState([]);
 
@@ -53,7 +56,10 @@ const Materials = () => {
                 unit: material.unit || 'millar',
                 cost_per_unit: material.cost_per_unit || '',
                 stock_quantity: material.stock_quantity || 0,
-                supplier_id: material.supplier_id || ''
+                supplier_id: material.supplier_id || '',
+                grammage: material.grammage || '',
+                width_mm: material.width_mm || '',
+                height_mm: material.height_mm || ''
             });
         } else {
             setCurrentMaterial(null);
@@ -63,7 +69,10 @@ const Materials = () => {
                 unit: 'millar',
                 cost_per_unit: '',
                 stock_quantity: 0,
-                supplier_id: ''
+                supplier_id: '',
+                grammage: '',
+                width_mm: '',
+                height_mm: ''
             });
         }
         setIsModalOpen(true);
@@ -272,6 +281,45 @@ const Materials = () => {
                             />
                         </div>
                     </div>
+
+                    {formData.type === 'paper' && (
+                        <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 rounded-md border border-gray-200">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Gramaje (gsm)</label>
+                                <input
+                                    type="number"
+                                    name="grammage"
+                                    value={formData.grammage}
+                                    onChange={handleChange}
+                                    placeholder="Ej: 80"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Ancho (mm)</label>
+                                <input
+                                    type="number"
+                                    name="width_mm"
+                                    value={formData.width_mm}
+                                    onChange={handleChange}
+                                    placeholder="Ej: 700"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Largo (mm)</label>
+                                <input
+                                    type="number"
+                                    name="height_mm"
+                                    value={formData.height_mm}
+                                    onChange={handleChange}
+                                    placeholder="Ej: 1000"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                />
+                            </div>
+                        </div>
+                    )}
+
                     {suppliers.length > 0 && (
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Proveedor Defecto</label>
