@@ -37,7 +37,7 @@ class HandleInertiaRequests extends Middleware
             'company' => function () {
                 $companyId = session('company_id');
                 if ($companyId) {
-                    return \App\Models\Company::select('id', 'name', 'tax_id')->find($companyId);
+                    return \App\Models\Company::select('id', 'name', 'tax_id', 'settings')->find($companyId);
                 }
                 return null;
             },

@@ -29,36 +29,56 @@ Route::middleware(['auth', 'verified', CheckCompany::class])->group(function () 
     })->name('dashboard');
 
     Route::get('/customers', function () {
-        return Inertia::render('Customers'); })->name('customers');
+        return Inertia::render('Customers');
+    })->name('customers');
     Route::get('/machines', function () {
-        return Inertia::render('Machines'); })->name('machines');
+        return Inertia::render('Machines');
+    })->name('machines');
     Route::get('/materials', function () {
-        return Inertia::render('Materials'); })->name('materials');
+        return Inertia::render('Materials');
+    })->name('materials');
     Route::get('/quotes', function () {
-        return Inertia::render('Quotes'); })->name('quotes');
+        return Inertia::render('Quotes');
+    })->name('quotes');
     Route::get('/work-orders', function () {
-        return Inertia::render('WorkOrders'); })->name('work-orders');
+        return Inertia::render('WorkOrders');
+    })->name('work-orders');
 
     Route::get('/accounting', function () {
-        return Inertia::render('Accounting'); })->name('accounting');
+        return Inertia::render('Accounting');
+    })->name('accounting');
     Route::get('/accounting/invoices', function () {
-        return Inertia::render('Accounting/Invoices'); })->name('accounting.invoices');
+        return Inertia::render('Accounting/Invoices');
+    })->name('accounting.invoices');
     Route::get('/accounting/expenses', function () {
-        return Inertia::render('Accounting/Expenses'); })->name('accounting.expenses');
+        return Inertia::render('Accounting/Expenses');
+    })->name('accounting.expenses');
     Route::get('/accounting/suppliers', function () {
-        return Inertia::render('Accounting/Suppliers'); })->name('accounting.suppliers');
+        return Inertia::render('Accounting/Suppliers');
+    })->name('accounting.suppliers');
 
     // Logistics
     Route::get('/logistics', function () {
-        return Inertia::render('Logistics/Index'); })->name('logistics.index');
+        return Inertia::render('Logistics/Index');
+    })->name('logistics.index');
     Route::get('/logistics/purchase-orders', function () {
-        return Inertia::render('Logistics/PurchaseOrders/Index'); })->name('logistics.purchase-orders');
+        return Inertia::render('Logistics/PurchaseOrders/Index');
+    })->name('logistics.purchase-orders');
     Route::get('/logistics/inventory', function () {
-        return Inertia::render('Logistics/Inventory/Index'); })->name('logistics.inventory');
+        return Inertia::render('Logistics/Inventory/Index');
+    })->name('logistics.inventory');
     Route::get('/logistics/reports/suppliers', function () {
-        return Inertia::render('Logistics/Reports/Suppliers'); })->name('logistics.reports.suppliers');
+        return Inertia::render('Logistics/Reports/Suppliers');
+    })->name('logistics.reports.suppliers');
     Route::get('/logistics/reports', function () {
-        return Inertia::render('Logistics/Reports/Index'); })->name('logistics.reports');
+        return Inertia::render('Logistics/Reports/Index');
+    })->name('logistics.reports');
+
+    // Configuration
+    Route::get('/configuration', function () {
+        return Inertia::render('Configuration/Index');
+    })->name('configuration.index');
+    Route::post('/configuration', [\App\Http\Controllers\ConfigurationController::class, 'update'])->name('configuration.update');
 
     // API Routes (moved from api.php to share session auth)
     Route::prefix('api')->group(function () {
