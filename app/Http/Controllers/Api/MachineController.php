@@ -17,14 +17,22 @@ class MachineController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|in:offset,digital,plotter,other',
+            'type' => 'required|in:offset,offset_continuous,digital,plotter,reprographics,screen_print',
             'hourly_rate' => 'required|numeric|min:0',
-            'setup_time' => 'nullable|numeric|min:0', // in minutes
+            'setup_time' => 'nullable|numeric|min:0', // in hours
+            'speed_sheets_per_hour' => 'nullable|integer|min:0',
             'click_cost_bw' => 'nullable|numeric|min:0',
             'click_cost_color' => 'nullable|numeric|min:0',
-            'max_width_mm' => 'nullable|integer|min:0',
-            'max_height_mm' => 'nullable|integer|min:0',
+            'max_width' => 'nullable|integer|min:0',
+            'max_height' => 'nullable|integer|min:0',
+            // 'description' => 'nullable|string', // Column missing in DB
         ]);
+
+        // Default nullable numeric fields to 0 as DB columns are NOT NULL
+        $validated['setup_time'] = $validated['setup_time'] ?? 0;
+        $validated['speed_sheets_per_hour'] = $validated['speed_sheets_per_hour'] ?? 0;
+        $validated['click_cost_bw'] = $validated['click_cost_bw'] ?? 0;
+        $validated['click_cost_color'] = $validated['click_cost_color'] ?? 0;
 
         $machine = Machine::create($validated);
 
@@ -40,14 +48,22 @@ class MachineController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|in:offset,digital,plotter,other',
+            'type' => 'required|in:offset,offset_continuous,digital,plotter,reprographics,screen_print',
             'hourly_rate' => 'required|numeric|min:0',
             'setup_time' => 'nullable|numeric|min:0',
+            'speed_sheets_per_hour' => 'nullable|integer|min:0',
             'click_cost_bw' => 'nullable|numeric|min:0',
             'click_cost_color' => 'nullable|numeric|min:0',
-            'max_width_mm' => 'nullable|integer|min:0',
-            'max_height_mm' => 'nullable|integer|min:0',
+            'max_width' => 'nullable|integer|min:0',
+            'max_height' => 'nullable|integer|min:0',
+            // 'description' => 'nullable|string',
         ]);
+
+        // Default nullable numeric fields to 0
+        $validated['setup_time'] = $validated['setup_time'] ?? 0;
+        $validated['speed_sheets_per_hour'] = $validated['speed_sheets_per_hour'] ?? 0;
+        $validated['click_cost_bw'] = $validated['click_cost_bw'] ?? 0;
+        $validated['click_cost_color'] = $validated['click_cost_color'] ?? 0;
 
         $machine->update($validated);
 
