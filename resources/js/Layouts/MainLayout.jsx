@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { LayoutDashboard, Users, Printer, Package, FileText, ClipboardList, BookOpen, Menu, X, DollarSign, LogOut, Building2, Truck, ChevronDown, ChevronRight, BarChart2 } from 'lucide-react';
+import { LayoutDashboard, Users, Printer, Package, FileText, ClipboardList, BookOpen, Menu, X, DollarSign, LogOut, Building2, Truck, ChevronDown, ChevronRight, BarChart2, Settings } from 'lucide-react';
 
 export default function MainLayout({ children }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -33,6 +33,7 @@ export default function MainLayout({ children }) {
         { name: 'Presupuestos', href: '/quotes', icon: FileText },
         { name: 'Órdenes de Trabajo', href: '/work-orders', icon: ClipboardList },
         { name: 'Logística', href: '/logistics', icon: Truck },
+        { name: 'Configuración', href: '/configuration', icon: Settings },
     ];
 
     return (
