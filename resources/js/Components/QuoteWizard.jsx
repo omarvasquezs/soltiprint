@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Printer, BookOpen, Layers, Image as ImageIcon, Copy, FileQuestion, ChevronDown } from 'lucide-react';
+import { usePage } from '@inertiajs/react';
 
 const QuoteWizard = ({
     onClose,
@@ -23,8 +24,6 @@ const QuoteWizard = ({
         paperType: '',
         grammage: '<Search>',
         paperDimensions: '<Propose>',
-        pressFormat: '<Propose>',
-        printingMachine: '<Propose>',
         pressFormat: '<Propose>',
         printingMachine: '<Propose>',
     });
@@ -124,9 +123,7 @@ const QuoteWizard = ({
         '<Propose>', '25x35', '32x44', '45x64', '65x90', '70x102', '102x130'
     ];
 
-    const printingMachineOptions = [
-        '<Propose>', 'HEIDE2C72', 'HEIDE4C72', 'NON-PRINT'
-    ];
+
 
     const formats = [
         { value: 'A6', label: 'A6 14.85x10.5' },
@@ -198,6 +195,8 @@ const QuoteWizard = ({
         'ROLL VINILE 3 m wide': { grammages: [100, 120, 150], sizes: ['300x1000'] },
     };
 
+
+
     // Filter customers based on search input
     const filteredCustomers = customers.filter(customer =>
         customer.name.toLowerCase().includes(formData.customerSearch.toLowerCase())
@@ -234,18 +233,35 @@ const QuoteWizard = ({
     };
 
     // Dynamic filtering for Step 5 (Print)
+    const { company } = usePage().props;
+    const settings = company?.settings || {};
+    const isUS = settings.measurement_system === 'us';
+    const unitLabel = isUS ? 'in' : 'cm';
+
     const getMachinesForFormat = (formatStr) => {
         if (!formatStr || formatStr === '<Propose>') return machines;
 
-        // Parse format like "70x100" (cm) to mm
-        const parts = formatStr.split('x').map(p => parseFloat(p) * 10);
+        // Parse format like "70x100" (cm or in) using 'x' as separator
+        // If metric: value * 10 = mm
+        // If US: value * 25.4 = mm
+        const parts = formatStr.split('x').map(p => parseFloat(p));
         if (parts.length !== 2) return machines;
 
-        const [w, h] = parts;
+        const multiplier = isUS ? 25.4 : 10;
+        const [w, h] = parts.map(p => p * multiplier);
+
         return machines.filter(m => {
-            if (!m.max_width_mm || !m.max_height_mm) return true; // Show machines without constraints
-            // Check both orientations
-            return (m.max_width_mm >= w && m.max_height_mm >= h) || (m.max_width_mm >= h && m.max_height_mm >= w);
+            // DB columns are now generic max_width/max_height
+            const maxW = m.max_width || m.max_width_mm; // Fallback if old code still populates mm
+            const maxH = m.max_height || m.max_height_mm;
+
+            if (!maxW || !maxH) return true;
+
+            // Strict filtering: Format MUST fit within machine max dimensions
+            const fitsNormal = (w <= maxW && h <= maxH);
+            const fitsRotated = (w <= maxH && h <= maxW);
+
+            return fitsNormal || fitsRotated;
         });
     };
 
@@ -766,7 +782,7 @@ const QuoteWizard = ({
                             <div className="space-y-8 max-w-3xl">
                                 {/* Press Format */}
                                 <div>
-                                    <label className="block font-bold text-gray-800 mb-2">Formato de máquina:</label>
+                                    <label className="block font-bold text-gray-800 mb-2">Formato de máquina ({unitLabel}):</label>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
                                         <select
                                             value={formData.pressFormat}
