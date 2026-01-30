@@ -152,47 +152,47 @@ const QuoteWizard = ({
         return [...options, ...others].sort((a, b) => a - b);
     };
 
-    // Standard papers library based on Logic Print behavior (Extracted from user screenshots)
+    // Standard papers library based on Logic Print behavior (Extracted from user screenshots and research)
     const STANDARD_PAPERS = {
-        'Acid Free': { grammages: [75, 90, 115, 120], sizes: ['61x86', '70x100'] },
-        'Archival': { grammages: [80, 100, 120], sizes: ['70x100'] },
-        'ArtBoard Gloss': { grammages: [200, 250, 300, 350], sizes: ['70x100', '72x102'] },
-        'ArtBoard Matt': { grammages: [200, 250, 300, 350], sizes: ['70x100', '72x102'] },
-        'ArtPaper Matt': { grammages: [90, 115, 130, 150, 170], sizes: ['61x86', '70x100'] },
-        'Bible': { grammages: [35, 40, 45, 50], sizes: ['70x100'] },
-        'BOND': { grammages: [60, 70, 75, 80, 90, 100, 115, 120], sizes: ['61x86', '70x100', '72x102'] },
-        'Book': { grammages: [60, 70, 80, 90], sizes: ['61x86', '70x100'] },
-        'Bristol': { grammages: [180, 220, 240, 260], sizes: ['70x100', '72x102'] },
-        'Carbonless Blue Botton': { grammages: [50, 56, 60], sizes: ['61x86', '72x102'] },
-        'Carbonless Blue Middle': { grammages: [50, 56, 60], sizes: ['61x86', '72x102'] },
-        'Carbonless Fuchsia Botton': { grammages: [50, 56, 60], sizes: ['61x86', '72x102'] },
-        'Carbonless Fuchsia Middle': { grammages: [50, 56, 60], sizes: ['61x86', '72x102'] },
-        'Carbonless Green Botton': { grammages: [50, 56, 60], sizes: ['61x86', '72x102'] },
-        'Carbonless Green Middle': { grammages: [50, 56, 60], sizes: ['61x86', '72x102'] },
-        'Carbonless White Botton': { grammages: [50, 56, 60], sizes: ['61x86', '72x102'] },
-        'Carbonless White Middle': { grammages: [50, 56, 60], sizes: ['61x86', '72x102'] },
-        'Carbonless White Top': { grammages: [50, 56, 60], sizes: ['61x86', '72x102'] },
-        'Carbonless Yellow Botton': { grammages: [50, 56, 60], sizes: ['61x86', '72x102'] },
-        'Carbonless Yellow Middle': { grammages: [50, 56, 60], sizes: ['61x86', '72x102'] },
-        'Catalog': { grammages: [115, 130, 150, 170], sizes: ['70x100'] },
-        'Coated': { grammages: [90, 115, 130, 150], sizes: ['61x86', '70x100'] },
-        'Cover': { grammages: [200, 250, 300], sizes: ['70x100'] },
-        'Folcote': { grammages: [210, 225, 240, 260, 280, 300, 320, 350], sizes: ['72x102'] },
-        'Generic': { grammages: [0, 60, 80, 200], sizes: ['70x100'] },
-        'Index': { grammages: [90, 120, 150, 180], sizes: ['70x100'] },
-        'Ledger': { grammages: [90, 120, 150], sizes: ['70x100'] },
-        'Mimeo': { grammages: [70, 75, 80], sizes: ['61x86', '70x100'] },
-        'Newsprint': { grammages: [45, 48, 52], sizes: ['61x86', '70x100'] },
-        'Photocopy paper A3': { grammages: [75, 80], sizes: ['29.7x42'] },
-        'Rag': { grammages: [80, 90, 100], sizes: ['70x100'] },
-        'Splendorgel': { grammages: [100, 120, 140, 160, 230, 270, 300], sizes: ['72x102'] },
-        'Tag': { grammages: [150, 180, 200, 240], sizes: ['70x100'] },
-        'Text': { grammages: [75, 90, 115, 125], sizes: ['61x86', '70x100'] },
+        'Acid Free': { grammages: [75, 90, 115, 120], sizes: ['61x86', '70x100'], defaultGrammage: '75', defaultSize: '<Propose>' },
+        'Archival': { grammages: [80, 100, 120], sizes: ['70x100'], defaultGrammage: '80', defaultSize: '70x100' },
+        'ArtBoard Gloss': { grammages: [200, 250, 300, 350], sizes: ['70x100', '72x102'], defaultGrammage: '200', defaultSize: '70x100' },
+        'ArtBoard Matt': { grammages: [200, 250, 300, 350], sizes: ['70x100', '72x102'], defaultGrammage: '200', defaultSize: '70x100' },
+        'ArtPaper Matt': { grammages: [90, 115, 130, 150, 170], sizes: ['61x86', '70x100'], defaultGrammage: '130', defaultSize: '61x86' },
+        'Bible': { grammages: [35, 40, 45, 50], sizes: ['70x100'], defaultGrammage: '35', defaultSize: '70x100' },
+        'BOND': { grammages: [60, 70, 75, 80, 90, 100, 115, 120, 125], sizes: ['61x86', '70x100', '72x102'], defaultGrammage: '125', defaultSize: '<Propose>' },
+        'Book': { grammages: [60, 70, 80, 90], sizes: ['61x86', '70x100'], defaultGrammage: '80', defaultSize: '<Propose>' },
+        'Bristol': { grammages: [180, 220, 240, 260], sizes: ['70x100', '72x102'], defaultGrammage: '240', defaultSize: '72x102' },
+        'Carbonless Blue Botton': { grammages: [50, 56, 60], sizes: ['61x86', '72x102', '65x90'], defaultGrammage: '60', defaultSize: '65x90' },
+        'Carbonless Blue Middle': { grammages: [50, 56, 60], sizes: ['61x86', '72x102', '65x90'], defaultGrammage: '60', defaultSize: '65x90' },
+        'Carbonless Fuchsia Botton': { grammages: [50, 56, 60], sizes: ['61x86', '72x102', '65x90'], defaultGrammage: '60', defaultSize: '65x90' },
+        'Carbonless Fuchsia Middle': { grammages: [50, 56, 60], sizes: ['61x86', '72x102', '65x90'], defaultGrammage: '60', defaultSize: '65x90' },
+        'Carbonless Green Botton': { grammages: [50, 56, 60], sizes: ['61x86', '72x102', '65x90'], defaultGrammage: '60', defaultSize: '65x90' },
+        'Carbonless Green Middle': { grammages: [50, 56, 60], sizes: ['61x86', '72x102', '65x90'], defaultGrammage: '60', defaultSize: '65x90' },
+        'Carbonless White Botton': { grammages: [50, 56, 60], sizes: ['61x86', '72x102', '65x90'], defaultGrammage: '60', defaultSize: '65x90' },
+        'Carbonless White Middle': { grammages: [50, 56, 60], sizes: ['61x86', '72x102', '65x90'], defaultGrammage: '60', defaultSize: '65x90' },
+        'Carbonless White Top': { grammages: [50, 56, 60], sizes: ['61x86', '72x102', '65x90'], defaultGrammage: '60', defaultSize: '65x90' },
+        'Carbonless Yellow Botton': { grammages: [50, 56, 60], sizes: ['61x86', '72x102', '65x90'], defaultGrammage: '60', defaultSize: '65x90' },
+        'Carbonless Yellow Middle': { grammages: [50, 56, 60], sizes: ['61x86', '72x102', '65x90'], defaultGrammage: '60', defaultSize: '65x90' },
+        'Catalog': { grammages: [115, 130, 150, 170], sizes: ['70x100'], defaultGrammage: '115', defaultSize: '70x100' },
+        'Coated': { grammages: [90, 115, 130, 150], sizes: ['61x86', '70x100'], defaultGrammage: '115', defaultSize: '61x86' },
+        'Cover': { grammages: [200, 250, 300], sizes: ['70x100'], defaultGrammage: '250', defaultSize: '70x100' },
+        'Folcote': { grammages: [210, 225, 240, 260, 280, 300, 320, 350], sizes: ['72x102'], defaultGrammage: '240', defaultSize: '72x102' },
+        'Generic': { grammages: [0, 60, 80, 200], sizes: ['70x100'], defaultGrammage: '80', defaultSize: '70x100' },
+        'Index': { grammages: [90, 120, 150, 180], sizes: ['70x100'], defaultGrammage: '120', defaultSize: '70x100' },
+        'Ledger': { grammages: [90, 120, 150], sizes: ['70x100'], defaultGrammage: '90', defaultSize: '70x100' },
+        'Mimeo': { grammages: [70, 75, 80], sizes: ['61x86', '70x100'], defaultGrammage: '75', defaultSize: '<Propose>' },
+        'Newsprint': { grammages: [45, 48, 52], sizes: ['61x86', '70x100'], defaultGrammage: '45', defaultSize: '65x90' },
+        'Photocopy paper A3': { grammages: [75, 80], sizes: ['29.7x42'], defaultGrammage: '75', defaultSize: '29.7x42' },
+        'Rag': { grammages: [80, 90, 100], sizes: ['70x100'], defaultGrammage: '80', defaultSize: '70x100' },
+        'Splendorgel': { grammages: [100, 120, 140, 160, 230, 270, 300], sizes: ['72x102'], defaultGrammage: '120', defaultSize: '72x102' },
+        'Tag': { grammages: [150, 180, 200, 240], sizes: ['70x100'], defaultGrammage: '180', defaultSize: '70x100' },
+        'Text': { grammages: [75, 90, 115, 125], sizes: ['61x86', '70x100'], defaultGrammage: '90', defaultSize: '61x86' },
         // Rolls
-        'CANVAS ROLL - 5 METERS WIDTH': { grammages: [300, 350], sizes: ['500x1000'] },
-        'ROLL BOND': { grammages: [75, 80, 90], sizes: ['61x1000', '90x1000'] },
-        'ROLL LABELS 10x13.5 IN 3 COLUMNS': { grammages: [80, 90], sizes: ['25.4x1000'] },
-        'ROLL VINILE 3 m wide': { grammages: [100, 120, 150], sizes: ['300x1000'] },
+        'CANVAS ROLL - 5 METERS WIDTH': { grammages: [300, 350], sizes: ['500x1000'], defaultGrammage: '300', defaultSize: '500x1000' },
+        'ROLL BOND': { grammages: [75, 80, 90], sizes: ['61x1000', '90x1000'], defaultGrammage: '75', defaultSize: '61x1000' },
+        'ROLL LABELS 10x13.5 IN 3 COLUMNS': { grammages: [80, 90], sizes: ['25.4x1000'], defaultGrammage: '80', defaultSize: '25.4x1000' },
+        'ROLL VINILE 3 m wide': { grammages: [100, 120, 150], sizes: ['300x1000'], defaultGrammage: '100', defaultSize: '300x1000' },
     };
 
 
@@ -648,11 +648,13 @@ const QuoteWizard = ({
                                                 placeholder="Escriba o seleccione un papel..."
                                                 onChange={(e) => {
                                                     const newVal = e.target.value;
+                                                    const exactMatch = STANDARD_PAPERS[newVal];
+
                                                     setFormData({
                                                         ...formData,
                                                         paperType: newVal,
-                                                        grammage: '<Search>',
-                                                        paperDimensions: '<Propose>'
+                                                        grammage: exactMatch ? (exactMatch.defaultGrammage || '<Search>') : formData.grammage,
+                                                        paperDimensions: exactMatch ? (exactMatch.defaultSize || '<Propose>') : formData.paperDimensions
                                                     });
                                                     setIsPaperDropdownOpen(true);
                                                 }}
@@ -692,11 +694,12 @@ const QuoteWizard = ({
                                                             key={p}
                                                             className={`relative cursor-default select-none py-2 pl-3 pr-9 hover:bg-blue-100 text-gray-900 ${formData.paperType === p ? 'bg-blue-50 font-medium' : ''}`}
                                                             onClick={() => {
+                                                                const defaults = STANDARD_PAPERS[p] || {};
                                                                 setFormData({
                                                                     ...formData,
                                                                     paperType: p,
-                                                                    grammage: '<Search>',
-                                                                    paperDimensions: '<Propose>'
+                                                                    grammage: defaults.defaultGrammage || '<Search>',
+                                                                    paperDimensions: defaults.defaultSize || '<Propose>'
                                                                 });
                                                                 setIsPaperDropdownOpen(false);
                                                             }}
