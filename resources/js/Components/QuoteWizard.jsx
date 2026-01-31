@@ -66,11 +66,21 @@ const QuoteWizard = ({
             if (formData.workType === 'general') {
                 setStep(5);
             }
+        } else if (step === 5) {
+            if (formData.workType === 'general') {
+                setStep(6);
+            }
+        } else if (step === 6) {
+            // Finalize for General
+            console.log('Finalizing General Quote:', formData);
+            alert("Presupuesto creado con éxito (simulado).");
+            onClose();
         } else {
             console.log('Next step with data:', formData);
             alert("Funcionalidad del siguiente paso en desarrollo.");
         }
     };
+
 
     const handleBack = () => {
         if (step > 1) {
@@ -279,6 +289,9 @@ const QuoteWizard = ({
             return !formData.pressFormat ||
                 !formData.printingMachine;
         }
+        if (step === 6 && formData.workType === 'general') {
+            return !formData.customerSearch;
+        }
         return false;
     };
 
@@ -298,6 +311,9 @@ const QuoteWizard = ({
         }
         if (step === 5) {
             if (formData.workType === 'general') return 'Impresión';
+        }
+        if (step === 6) {
+            if (formData.workType === 'general') return 'Cliente y cantidad de copias';
         }
         return '';
     };
@@ -824,6 +840,107 @@ const QuoteWizard = ({
                             </div>
                         </>
                     )}
+
+                    {step === 6 && formData.workType === 'general' && (
+                        <>
+                            <div className="flex justify-between items-start mb-6">
+                                <div className="flex-grow">
+                                    <p className="text-gray-600 mb-2">Finalmente, indique el cliente y la cantidad de copias.</p>
+                                </div>
+                                <div className="hidden lg:block ml-4">
+                                    <div className="h-24 w-24 bg-blue-50 rounded-lg flex items-center justify-center border border-blue-100 shadow-sm">
+                                        <Layers className="h-16 w-16 text-blue-400 opacity-60" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-6 max-w-3xl">
+                                {/* Customer Selection - Simplified */}
+                                <div>
+                                    <label className="block font-bold text-gray-800 mb-1">Cliente:</label>
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                        <div className="relative w-full sm:w-96">
+                                            <input
+                                                type="text"
+                                                list="customerOptions"
+                                                value={formData.customerSearch}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    const matchedCustomer = customers.find(c => c.name === val);
+                                                    setFormData({
+                                                        ...formData,
+                                                        customerSearch: val,
+                                                        customerId: matchedCustomer ? matchedCustomer.id : ''
+                                                    });
+                                                }}
+                                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 pl-10"
+                                                placeholder="Buscar cliente por nombre..."
+                                            />
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                {/* Search Icon */}
+                                                <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                                                </svg>
+                                            </div>
+                                            <datalist id="customerOptions">
+                                                {/* Filter customers if needed, or show all */}
+                                                {filteredCustomers.map(c => (
+                                                    <option key={c.id} value={c.name} />
+                                                ))}
+                                            </datalist>
+                                        </div>
+                                        <div className="text-sm text-gray-500 italic hidden sm:block">
+                                            Puede indicar el código (ID) o escribir parte del nombre del cliente.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Copies */}
+                                <div>
+                                    <label className="block font-bold text-gray-800 mb-1">Ejemplares (Copias):</label>
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                        <div className="relative w-full sm:w-64">
+                                            <input
+                                                type="number"
+                                                list="copiesOptions"
+                                                value={formData.copies}
+                                                onChange={(e) => setFormData({ ...formData, copies: e.target.value })}
+                                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                            />
+                                            <datalist id="copiesOptions">
+                                                {[1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000].map(n => (
+                                                    <option key={n} value={n} />
+                                                ))}
+                                            </datalist>
+                                        </div>
+                                        <div className="text-sm text-gray-500 italic hidden sm:block">
+                                            Más tarde podrá cambiar esta cantidad o calcular escalados.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Product */}
+                                <div>
+                                    <label className="block font-bold text-gray-800 mb-1">Producto:</label>
+                                    <div className="w-full sm:w-64">
+                                        <select
+                                            value={formData.product}
+                                            onChange={(e) => setFormData({ ...formData, product: e.target.value })}
+                                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                        >
+                                            {products.map(p => (
+                                                <option key={p} value={p}>{p}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <p className="mt-1 text-xs text-gray-500">
+                                        Opcionalmente, seleccione el tipo de producto. Recuerde que puede configurar su lista de productos desde la pantalla de inicio.
+                                    </p>
+                                </div>
+                            </div>
+                        </>
+                    )}
+
                 </div>
 
                 <div className="mt-8 flex justify-end space-x-3 pt-4 border-t">
@@ -841,11 +958,11 @@ const QuoteWizard = ({
                             : 'bg-blue-600 text-white hover:bg-blue-700'
                             }`}
                     >
-                        {step === 2 && formData.workType === 'free' ? 'Terminar' : (step === 3 && formData.workType === 'general' ? 'Siguiente >>' : (step === 4 && formData.workType === 'general' ? 'Siguiente >>' : (step === 5 && formData.workType === 'general' ? 'Siguiente >>' : 'Siguiente >>')))}
+                        {step === 6 || (step === 2 && formData.workType === 'free') ? 'Terminar' : 'Siguiente >>'}
                     </button>
                 </div>
             </div>
-        </div >
+        </div>
     );
 };
 
