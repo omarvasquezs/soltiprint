@@ -276,8 +276,8 @@ const QuoteWizard = ({
             return !formData.paperType;
         }
         if (step === 5 && formData.workType === 'general') {
-            return !formData.pressFormat || formData.pressFormat === '<Propose>' ||
-                !formData.printingMachine || formData.printingMachine === '<Propose>';
+            return !formData.pressFormat ||
+                !formData.printingMachine;
         }
         return false;
     };
