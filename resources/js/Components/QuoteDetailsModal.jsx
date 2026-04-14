@@ -76,9 +76,7 @@ const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
 
     // Auto-recalculate when cost, margin, or copies change
     useEffect(() => {
-        if (details.total_cost > 0) {
-            handleRecalculate();
-        }
+        handleRecalculate();
     }, [details.total_cost, details.margin, details.copies]);
 
     const handleRecalculate = () => {
@@ -117,17 +115,17 @@ const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
     const today = new Date().toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[95vh] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 sm:p-8">
+            <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-full h-fit flex flex-col overflow-hidden">
                 {/* Header */}
-                <div className="flex justify-between items-center p-4 border-b bg-gray-50">
+                <div className="flex justify-between items-center p-4 border-b bg-gray-50 flex-shrink-0">
                     <div className="flex items-center gap-3">
                         <FileText className="h-6 w-6 text-blue-600" />
                         <div>
                             <h2 className="text-lg font-semibold text-gray-800">
-                                Quote details No {quoteData?.analysisId || '----'} - Created: {today}
+                                Detalles de Presupuesto N° {quoteData?.analysisId || '----'} - Creado: {today}
                             </h2>
-                            <p className="text-xs text-gray-500">Last edited: Soltiprint ERP</p>
+                            <p className="text-xs text-gray-500">Última edición: Soltiprint ERP</p>
                         </div>
                     </div>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
@@ -136,16 +134,16 @@ const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-6">
+                <div className="flex-1 overflow-y-auto p-6 min-h-0">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Left Column: Definition of Work */}
                         <div className="lg:col-span-2 space-y-6">
                             {/* Customer and Description */}
                             <div className="border rounded-lg p-4">
-                                <h3 className="font-semibold text-gray-700 mb-3 border-b pb-2">Customer & Job</h3>
+                                <h3 className="font-semibold text-gray-700 mb-3 border-b pb-2">Cliente y Trabajo</h3>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Customer</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Cliente</label>
                                         <input
                                             type="text"
                                             value={details.customer_name}
@@ -154,7 +152,7 @@ const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
                                         <input
                                             type="text"
                                             value={details.description}
@@ -163,18 +161,18 @@ const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
                                         <select
                                             value={details.state}
                                             onChange={(e) => setDetails({ ...details, state: e.target.value })}
                                             className="w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
                                         >
-                                            <option value="Draft">Draft</option>
-                                            <option value="Issued">Issued</option>
+                                            <option value="Draft">Borrador</option>
+                                            <option value="Issued">Emitido</option>
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Copies</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Copias</label>
                                         <input
                                             type="number"
                                             value={details.copies}
@@ -187,14 +185,14 @@ const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
 
                             {/* Definition of Work */}
                             <div className="border rounded-lg p-4">
-                                <h3 className="font-semibold text-gray-700 mb-3 border-b pb-2">Definition of work</h3>
+                                <h3 className="font-semibold text-gray-700 mb-3 border-b pb-2">Definición del trabajo</h3>
 
                                 {/* Printing Section */}
                                 <div className="mb-4">
-                                    <h4 className="text-sm font-semibold text-blue-700 mb-2">Printing</h4>
+                                    <h4 className="text-sm font-semibold text-blue-700 mb-2">Impresión</h4>
                                     <div className="grid grid-cols-3 gap-3">
                                         <div>
-                                            <label className="block text-xs text-gray-600 mb-1">Finish format (open):</label>
+                                            <label className="block text-xs text-gray-600 mb-1">Formato final (abierto):</label>
                                             <input
                                                 type="text"
                                                 value={details.finish_format}
@@ -203,7 +201,7 @@ const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-xs text-gray-600 mb-1">Inks:</label>
+                                            <label className="block text-xs text-gray-600 mb-1">Tintas:</label>
                                             <input
                                                 type="text"
                                                 value={details.inks}
@@ -212,7 +210,7 @@ const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-xs text-gray-600 mb-1">Pages:</label>
+                                            <label className="block text-xs text-gray-600 mb-1">Páginas:</label>
                                             <input
                                                 type="text"
                                                 value={details.pages || '1'}
@@ -221,7 +219,7 @@ const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-xs text-gray-600 mb-1">Press format:</label>
+                                            <label className="block text-xs text-gray-600 mb-1">Formato de impresión:</label>
                                             <input
                                                 type="text"
                                                 value={details.press_format}
@@ -230,7 +228,7 @@ const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
                                             />
                                         </div>
                                         <div className="col-span-2">
-                                            <label className="block text-xs text-gray-600 mb-1">Machine:</label>
+                                            <label className="block text-xs text-gray-600 mb-1">Máquina:</label>
                                             <input
                                                 type="text"
                                                 value={details.machine_name}
@@ -243,10 +241,10 @@ const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
 
                                 {/* Paper Section */}
                                 <div>
-                                    <h4 className="text-sm font-semibold text-blue-700 mb-2">Type of paper or media</h4>
+                                    <h4 className="text-sm font-semibold text-blue-700 mb-2">Tipo de papel o soporte</h4>
                                     <div className="grid grid-cols-3 gap-3">
                                         <div className="col-span-2">
-                                            <label className="block text-xs text-gray-600 mb-1">Paper or support:</label>
+                                            <label className="block text-xs text-gray-600 mb-1">Papel o soporte:</label>
                                             <input
                                                 type="text"
                                                 value={details.paper_type}
@@ -255,7 +253,7 @@ const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-xs text-gray-600 mb-1">Grammage:</label>
+                                            <label className="block text-xs text-gray-600 mb-1">Gramaje:</label>
                                             <input
                                                 type="text"
                                                 value={details.grammage}
@@ -264,7 +262,7 @@ const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-xs text-gray-600 mb-1">Manufacturer:</label>
+                                            <label className="block text-xs text-gray-600 mb-1">Fabricante:</label>
                                             <input
                                                 type="text"
                                                 value={details.manufacturer}
@@ -273,7 +271,7 @@ const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-xs text-gray-600 mb-1">Article ID:</label>
+                                            <label className="block text-xs text-gray-600 mb-1">ID Artículo:</label>
                                             <input
                                                 type="text"
                                                 value={details.article_id}
@@ -282,7 +280,7 @@ const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-xs text-gray-600 mb-1">Dimensions:</label>
+                                            <label className="block text-xs text-gray-600 mb-1">Dimensiones:</label>
                                             <input
                                                 type="text"
                                                 value={details.paper_dimensions}
@@ -296,13 +294,13 @@ const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
 
                             {/* Notes */}
                             <div className="border rounded-lg p-4">
-                                <h3 className="font-semibold text-gray-700 mb-3 border-b pb-2">Notes</h3>
+                                <h3 className="font-semibold text-gray-700 mb-3 border-b pb-2">Notas</h3>
                                 <textarea
                                     value={details.notes}
                                     onChange={(e) => setDetails({ ...details, notes: e.target.value })}
                                     rows={3}
                                     className="w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
-                                    placeholder="Additional notes or specifications..."
+                                    placeholder="Notas adicionales o especificaciones..."
                                 />
                             </div>
                         </div>
@@ -310,7 +308,7 @@ const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
                         {/* Right Column: Work Costs */}
                         <div className="space-y-4">
                             <div className="border rounded-lg p-4 bg-blue-50">
-                                <h3 className="font-semibold text-gray-700 mb-4 border-b border-blue-200 pb-2">Work costs</h3>
+                                <h3 className="font-semibold text-gray-700 mb-4 border-b border-blue-200 pb-2">Costos del trabajo</h3>
 
                                 {/* Cost Breakdown */}
                                 <div className="space-y-3 mb-4">
@@ -319,11 +317,11 @@ const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
                                         <span className="text-sm font-semibold">{parseFloat(details.cost_materials || 0).toFixed(2)}</span>
                                     </div>
                                     <div className="flex justify-between items-center pb-3 border-b border-blue-200">
-                                        <span className="text-sm font-medium text-gray-700">Operations</span>
+                                        <span className="text-sm font-medium text-gray-700">Operaciones</span>
                                         <span className="text-sm font-semibold">{parseFloat(details.cost_operations || 0).toFixed(2)}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-sm font-bold text-gray-800">Cost of materials:</span>
+                                        <span className="text-sm font-bold text-gray-800">Costo total de materiales:</span>
                                         <span className="text-sm font-bold">{parseFloat(details.cost_materials || 0).toFixed(2)}</span>
                                     </div>
                                 </div>
@@ -332,7 +330,7 @@ const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
                                 <div className="space-y-3">
                                     <div className="grid grid-cols-2 gap-2">
                                         <div>
-                                            <label className="block text-xs text-gray-600 mb-1">Total cost:</label>
+                                            <label className="block text-xs text-gray-600 mb-1">Costo total:</label>
                                             <input
                                                 type="number"
                                                 step="0.01"
@@ -342,7 +340,7 @@ const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-xs text-gray-600 mb-1">Margin (%):</label>
+                                            <label className="block text-xs text-gray-600 mb-1">Margen (%):</label>
                                             <input
                                                 type="number"
                                                 step="1"
@@ -358,22 +356,22 @@ const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
                                         className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 flex items-center justify-center gap-2 text-sm font-medium"
                                     >
                                         <Calculator className="h-4 w-4" />
-                                        Recalculate (F5)
+                                        Recalcular (F5)
                                     </button>
                                 </div>
 
                                 {/* Totals */}
                                 <div className="mt-4 pt-4 border-t border-blue-200 space-y-2">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-sm text-gray-700">Profit:</span>
+                                        <span className="text-sm text-gray-700">Beneficio:</span>
                                         <span className="text-sm font-semibold">{details.profit}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-sm text-gray-700">U/P:</span>
+                                        <span className="text-sm text-gray-700">P/U:</span>
                                         <span className="text-sm font-semibold">{details.unit_price}</span>
                                     </div>
                                     <div className="flex justify-between items-center pt-2 border-t border-blue-200">
-                                        <span className="text-base font-bold text-gray-800">Total amount:</span>
+                                        <span className="text-base font-bold text-gray-800">Monto total:</span>
                                         <span className="text-lg font-bold text-blue-700">{details.total_amount}</span>
                                     </div>
                                 </div>
@@ -383,7 +381,7 @@ const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
                 </div>
 
                 {/* Footer */}
-                <div className="flex justify-end items-center gap-3 p-4 border-t bg-gray-50">
+                <div className="flex justify-end items-center gap-3 p-4 border-t bg-gray-50 flex-shrink-0">
                     <button
                         onClick={handleSave}
                         className="px-8 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
@@ -394,7 +392,7 @@ const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
                         onClick={onClose}
                         className="px-8 py-2 bg-white border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-medium"
                     >
-                        Cancel
+                        Cancelar
                     </button>
                 </div>
             </div>

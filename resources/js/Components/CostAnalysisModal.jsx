@@ -59,23 +59,23 @@ const CostAnalysisModal = ({ isOpen, onClose, wizardData, onMachineSelected }) =
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[55] p-4 sm:p-8">
+            <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-full h-fit overflow-hidden flex flex-col">
                 {/* Header */}
-                <div className="flex justify-between items-center p-4 border-b bg-gray-50">
-                    <h2 className="text-lg font-semibold text-gray-800">Proposal for printing machine</h2>
+                <div className="flex justify-between items-center p-4 border-b bg-gray-50 flex-shrink-0">
+                    <h2 className="text-lg font-semibold text-gray-800">Propuesta de máquina de impresión</h2>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
                         <X className="h-5 w-5" />
                     </button>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-6">
+                <div className="flex-1 overflow-y-auto p-6 min-h-0">
                     {loading ? (
                         <div className="flex items-center justify-center py-12">
                             <div className="text-center">
                                 <Search className="h-12 w-12 text-blue-500 animate-pulse mx-auto mb-4" />
-                                <p className="text-gray-600">Analyzing costs...</p>
+                                <p className="text-gray-600">Analizando costos...</p>
                             </div>
                         </div>
                     ) : (
@@ -85,29 +85,29 @@ const CostAnalysisModal = ({ isOpen, onClose, wizardData, onMachineSelected }) =
                                 <div className="flex items-center mb-2">
                                     <Search className="h-8 w-8 text-gray-600 mr-3" />
                                     <h3 className="text-2xl font-serif text-gray-700">
-                                        Cost analysis completed [{analysisId}].
+                                        Análisis de costos completado [{analysisId}].
                                     </h3>
                                 </div>
                                 <p className="text-gray-600 text-sm mt-2">
-                                    Allows you to identify the printing machine and print format that offer the lowest cost for the current job.
-                                    It's recommended to use this option after changing the number of copies, inks, finished format, page number, etc.
+                                    Permite identificar la máquina de impresión y formato que ofrecen el menor costo para el trabajo actual.
+                                    Se recomienda usar esta opción tras cambiar la cantidad de copias, tintas, formato final, etc.
                                 </p>
                             </div>
 
                             {/* Cost Analysis Table */}
                             <div className="border rounded-lg overflow-hidden mb-6">
                                 <div className="bg-blue-50 border-b px-4 py-2">
-                                    <h4 className="font-semibold text-gray-700">Cost analysis</h4>
+                                    <h4 className="font-semibold text-gray-700">Análisis de costos</h4>
                                 </div>
                                 <div className="overflow-x-auto">
                                     <table className="min-w-full divide-y divide-gray-200">
                                         <thead className="bg-gray-100">
                                             <tr>
-                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Machine</th>
-                                                <th className="px-4 py-2 text-right text-xs font-medium text-gray-700 uppercase">Cost (Overcost)</th>
-                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Press format</th>
-                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Paper or media</th>
-                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Media ID</th>
+                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Máquina</th>
+                                                <th className="px-4 py-2 text-right text-xs font-medium text-gray-700 uppercase">Costo (Sobrecosto)</th>
+                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Formato de impresión</th>
+                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Papel o soporte</th>
+                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">ID Material</th>
                                             </tr>
                                         </thead>
                                         <tbody className="bg-white divide-y divide-gray-200">
@@ -137,17 +137,17 @@ const CostAnalysisModal = ({ isOpen, onClose, wizardData, onMachineSelected }) =
 
                             {/* Warning Message */}
                             <div className="bg-amber-50 border border-amber-200 rounded p-3 mb-6 text-sm text-amber-800 italic">
-                                Usually the overcost does not add value to the client, so if a machine with overcost is chosen,
-                                the chances of the budget being rejected increase.
+                                Normalmente el sobrecosto no añade valor al cliente, por lo que si se elige una máquina con sobrecosto,
+                                aumentan las posibilidades de que el presupuesto sea rechazado.
                             </div>
 
                             {/* Machine Selection */}
                             <div className="border rounded-lg p-4 bg-gray-50">
                                 <div className="bg-blue-50 border-b px-4 py-2 -m-4 mb-4">
-                                    <h4 className="font-semibold text-gray-700">Printing machine proposal</h4>
+                                    <h4 className="font-semibold text-gray-700">Propuesta de máquina de impresión</h4>
                                 </div>
                                 <p className="text-sm text-gray-600 mb-3">
-                                    To choose another machine, select it from the dropdown list. You can also double click on a machine from the top list.
+                                    Para elegir otra máquina, selecciónela de la lista. También puede hacer doble clic sobre una máquina de la lista superior.
                                 </p>
                                 <div className="flex items-center gap-4">
                                     <select
@@ -168,19 +168,19 @@ const CostAnalysisModal = ({ isOpen, onClose, wizardData, onMachineSelected }) =
                 </div>
 
                 {/* Footer */}
-                <div className="flex justify-end items-center gap-3 p-4 border-t bg-gray-50">
+                <div className="flex justify-end items-center gap-3 p-4 border-t bg-gray-50 flex-shrink-0">
                     <button
                         onClick={handleOk}
                         disabled={loading || !selectedMachineId}
                         className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium"
                     >
-                        OK
+                        Aceptar
                     </button>
                     <button
                         onClick={onClose}
                         className="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-medium"
                     >
-                        Cancel
+                        Cancelar
                     </button>
                 </div>
             </div>
