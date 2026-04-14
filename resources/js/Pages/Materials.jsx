@@ -55,7 +55,7 @@ const Materials = () => {
                 name: material.name || '',
                 type: material.type || 'paper',
                 unit: material.unit || 'millar',
-                cost_per_unit: material.cost_per_unit || '',
+                cost_per_unit: material.cost_per_unit ? parseFloat(material.cost_per_unit).toFixed(2) : '',
                 stock_quantity: material.stock_quantity || 0,
                 supplier_id: material.supplier_id || '',
                 grammage: material.grammage || '',
