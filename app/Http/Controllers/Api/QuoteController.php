@@ -28,7 +28,7 @@ class QuoteController extends Controller
             'title' => 'nullable|string',
             'copies' => 'nullable|integer',
             'state' => 'nullable|string',
-            'total' => 'nullable|numeric',
+            'total_amount' => 'nullable|numeric',
         ]);
 
         // Get customer for reference
@@ -44,7 +44,7 @@ class QuoteController extends Controller
             'title' => $validated['title'] ?? 'GENERAL',
             'state' => $validated['state'] ?? 'Draft',
             'copies' => $validated['copies'] ?? 0,
-            'total' => $validated['total'] ?? 0,
+            'total_amount' => $validated['total_amount'] ?? 0,
             'status' => 'draft', // keep for backwards compat
 
             // Work definition fields

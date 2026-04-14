@@ -155,7 +155,7 @@ const QuoteWizard = ({
                 margin: quoteDetails.margin,
                 profit: quoteDetails.profit,
                 unit_price: quoteDetails.unit_price,
-                total: quoteDetails.total_amount,
+                total_amount: quoteDetails.total_amount,
 
                 notes: quoteDetails.notes,
             };

@@ -52,6 +52,8 @@ return new class extends Migration {
                 $table->decimal('profit', 10, 2)->nullable();
             if (!Schema::hasColumn('quotes', 'unit_price'))
                 $table->decimal('unit_price', 10, 4)->nullable();
+            if (!Schema::hasColumn('quotes', 'total_amount'))
+                $table->decimal('total_amount', 10, 2)->nullable();
 
             // State and notes
             if (!Schema::hasColumn('quotes', 'state'))
@@ -84,6 +86,7 @@ return new class extends Migration {
                 'margin',
                 'profit',
                 'unit_price',
+                'total_amount',
                 'state',
                 'notes'
             ];
