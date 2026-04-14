@@ -169,7 +169,7 @@ const Materials = () => {
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm text-gray-900">S/ {material.cost_per_unit} / {material.unit}</div>
+                                    <div className="text-sm text-gray-900">S/ {parseFloat(material.cost_per_unit).toFixed(2)} / {material.unit}</div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="text-sm text-gray-900">{material.stock_quantity}</div>
