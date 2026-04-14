@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Printer, BookOpen, Layers, Image as ImageIcon, Copy, FileQuestion, ChevronDown } from 'lucide-react';
-import { usePage } from '@inertiajs/react';
+import { usePage, router } from '@inertiajs/react';
+import CostAnalysisModal from './CostAnalysisModal';
+import QuoteDetailsModal from './QuoteDetailsModal';
 
 const QuoteWizard = ({
     onClose,
@@ -30,6 +32,11 @@ const QuoteWizard = ({
 
     const [isPaperDropdownOpen, setIsPaperDropdownOpen] = useState(false);
     const paperDropdownRef = useRef(null);
+
+    // Modal flow states
+    const [showCostAnalysis, setShowCostAnalysis] = useState(false);
+    const [showQuoteDetails, setShowQuoteDetails] = useState(false);
+    const [enrichedQuoteData, setEnrichedQuoteData] = useState(null);
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -71,10 +78,33 @@ const QuoteWizard = ({
                 setStep(6);
             }
         } else if (step === 6) {
-            // Finalize for General
-            console.log('Finalizing General Quote:', formData);
-            alert("Presupuesto creado con éxito (simulado).");
-            onClose();
+            // Check if user manually selected press format and machine
+            const hasMachineSelection =
+                formData.pressFormat &&
+                formData.pressFormat !== '<Propose>' &&
+                formData.printingMachine &&
+                formData.printingMachine !== '<Propose>';
+
+            if (hasMachineSelection) {
+                // User selected machine manually, go directly to Quote Details
+                const enrichedData = {
+                    ...formData,
+                    selectedMachine: {
+                        machine_id: null, // We don't have machine ID from dropdown selection
+                        machine_name: formData.printingMachine,
+                        press_format: formData.pressFormat,
+                        cost: 100, // Placeholder cost
+                        paper_size: formData.paperDimensions || '45x64',
+                        media_id: `${formData.paperType}-${formData.grammage}`,
+                    },
+                    analysisId: Math.floor(Math.random() * 10000),
+                };
+                setEnrichedQuoteData(enrichedData);
+                setShowQuoteDetails(true);
+            } else {
+                // No machine selected, trigger cost analysis
+                setShowCostAnalysis(true);
+            }
         } else {
             console.log('Next step with data:', formData);
             alert("Funcionalidad del siguiente paso en desarrollo.");
@@ -85,6 +115,59 @@ const QuoteWizard = ({
     const handleBack = () => {
         if (step > 1) {
             setStep(step - 1);
+        }
+    };
+
+    const handleMachineSelected = (dataWithMachine) => {
+        setEnrichedQuoteData(dataWithMachine);
+        setShowCostAnalysis(false);
+        setShowQuoteDetails(true);
+    };
+
+    const handleQuoteSave = async (quoteDetails) => {
+        try {
+            const payload = {
+                customer_id: quoteDetails.customer_id,
+                title: quoteDetails.description,
+                state: quoteDetails.state,
+                copies: quoteDetails.copies,
+
+                // Work definition
+                finish_format: quoteDetails.finish_format,
+                inks: quoteDetails.inks,
+                pages: quoteDetails.pages,
+                precut: '',
+                printing_type: 'Offset',
+                press_format: quoteDetails.press_format,
+                machine_id: quoteDetails.machine_id,
+
+                // Paper details
+                paper_type: quoteDetails.paper_type,
+                grammage: quoteDetails.grammage,
+                paper_dimensions: quoteDetails.paper_dimensions,
+                manufacturer: quoteDetails.manufacturer,
+                article_id: quoteDetails.article_id,
+
+                // Financial
+                cost_materials: quoteDetails.cost_materials,
+                cost_operations: quoteDetails.cost_operations,
+                total_cost: quoteDetails.total_cost,
+                margin: quoteDetails.margin,
+                profit: quoteDetails.profit,
+                unit_price: quoteDetails.unit_price,
+                total: quoteDetails.total_amount,
+
+                notes: quoteDetails.notes,
+            };
+
+            const response = await window.axios.post('/api/quotes', payload);
+
+            // Success - redirect to quotes list or close
+            alert(`Presupuesto creado exitosamente: ${response.data.reference}`);
+            router.visit('/quotes');
+        } catch (error) {
+            console.error('Error saving quote:', error);
+            throw error;
         }
     };
 
@@ -319,547 +402,209 @@ const QuoteWizard = ({
     };
 
     return (
-        <div className="flex h-[80vh]">
-            {/* Left Image Sidebar */}
-            <div className="hidden md:flex w-1/3 bg-gray-100 items-center justify-center p-4 border-r">
-                <div className="text-gray-400 text-center">
-                    <Printer className="h-24 w-24 mx-auto mb-2 opacity-20" />
-                    <span className="text-sm">Asistente de Presupuestos</span>
-                </div>
-            </div>
-
-            {/* Right Content */}
-            <div className="w-full md:w-2/3 p-6 flex flex-col">
-                <div className="flex justify-between items-start mb-2">
-                    <h2 className="text-2xl font-serif text-gray-700 italic">
-                        {getStepTitle()}
-                    </h2>
-
+        <>
+            <div className="flex h-[80vh]">
+                {/* Left Image Sidebar */}
+                <div className="hidden md:flex w-1/3 bg-gray-100 items-center justify-center p-4 border-r">
+                    <div className="text-gray-400 text-center">
+                        <Printer className="h-24 w-24 mx-auto mb-2 opacity-20" />
+                        <span className="text-sm">Asistente de Presupuestos</span>
+                    </div>
                 </div>
 
-                <div className="flex-grow overflow-y-auto pr-2">
-                    {step === 1 && (
-                        <>
-                            <p className="text-gray-600 mb-6 font-serif italic text-lg">Este asistente le ayudará a preparar el presupuesto.</p>
-                            <h3 className="font-bold text-gray-800 mb-3">Indique el tipo de trabajo:</h3>
-                            <div className="space-y-3">
-                                {workTypes.map((type) => (
-                                    <label key={type.id} className="flex items-start space-x-3 cursor-pointer p-2 hover:bg-gray-50 rounded-md transition-colors select-none">
+                {/* Right Content */}
+                <div className="w-full md:w-2/3 p-6 flex flex-col">
+                    <div className="flex justify-between items-start mb-2">
+                        <h2 className="text-2xl font-serif text-gray-700 italic">
+                            {getStepTitle()}
+                        </h2>
+
+                    </div>
+
+                    <div className="flex-grow overflow-y-auto pr-2">
+                        {step === 1 && (
+                            <>
+                                <p className="text-gray-600 mb-6 font-serif italic text-lg">Este asistente le ayudará a preparar el presupuesto.</p>
+                                <h3 className="font-bold text-gray-800 mb-3">Indique el tipo de trabajo:</h3>
+                                <div className="space-y-3">
+                                    {workTypes.map((type) => (
+                                        <label key={type.id} className="flex items-start space-x-3 cursor-pointer p-2 hover:bg-gray-50 rounded-md transition-colors select-none">
+                                            <input
+                                                type="radio"
+                                                name="workType"
+                                                value={type.id}
+                                                checked={formData.workType === type.id}
+                                                onChange={(e) => setFormData({ ...formData, workType: e.target.value })}
+                                                className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                                            />
+                                            <div>
+                                                <span className="block font-medium text-gray-900">{type.label}</span>
+                                                {type.description && (
+                                                    <span className="block text-sm text-gray-500">{type.description}</span>
+                                                )}
+                                            </div>
+                                        </label>
+                                    ))}
+                                </div>
+                            </>
+                        )}
+
+                        {step === 2 && (formData.workType === 'general' || formData.workType === 'plotter' || formData.workType === 'copies') && (
+                            <>
+                                <p className="text-gray-600 mb-6">Indique el formato del trabajo terminado (cortado, pero sin plegar).</p>
+
+                                <div className="mb-4">
+                                    <label className="block font-bold text-gray-800 mb-2">Formato final (abierto):</label>
+                                    <div className="flex items-center space-x-4">
+                                        <select
+                                            value={formData.format}
+                                            onChange={(e) => setFormData({ ...formData, format: e.target.value })}
+                                            className="block w-64 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                        >
+                                            <option disabled value="">&lt;Unidades&gt;</option>
+                                            {formats.map(f => (
+                                                <option key={f.value} value={f.value}>{f.label}</option>
+                                            ))}
+                                        </select>
+                                        <span className="text-sm text-gray-500 font-bold">(Recuerde que todas las medidas están en centímetros.)</span>
+                                    </div>
+                                </div>
+
+                                {formData.format === 'custom' && (
+                                    <div className="ml-0 mt-2 p-4 bg-gray-50 rounded-md border border-gray-200 inline-block">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Especifique dimensiones (cm):</label>
+                                        <input
+                                            type="text"
+                                            value={formData.customFormat}
+                                            onChange={(e) => setFormData({ ...formData, customFormat: e.target.value })}
+                                            placeholder="Ej: 16x11"
+                                            className="block w-64 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                        />
+                                    </div>
+                                )}
+
+                                <div className="mt-8">
+                                    <p className="text-gray-500 text-sm mb-2">Si el formato deseado no está en la lista, escríbalo directamente en el cuadro. Por ejemplo: 16x11.</p>
+                                    <p className="text-gray-500 text-sm italic mb-2">Opcionalmente, puede añadir el nombre del formato (al principio).</p>
+                                    <p className="text-gray-500 text-sm italic">Los formatos más usados en sus trabajos se añaden automáticamente a la lista.</p>
+                                </div>
+                            </>
+                        )}
+
+                        {step === 2 && formData.workType === 'paginated' && (
+                            <>
+                                <div className="mb-6 pb-4 border-b border-gray-200">
+                                    <p className="text-gray-600 mb-2">Los trabajos paginados pueden tener varios componentes impresos (segmentos). Por ejemplo: portada, interior, inserto, etc.</p>
+                                    <p className="text-gray-600">Asigne un nombre a este componente impreso e indique el número de páginas.</p>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="block font-bold text-gray-800 mb-1">Nombre del Componente:</label>
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                            <input
+                                                type="text"
+                                                value={formData.componentName}
+                                                onChange={(e) => setFormData({ ...formData, componentName: e.target.value })}
+                                                className="block w-full sm:w-64 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                            />
+                                            <p className="text-sm text-gray-500 italic">Por ejemplo: Portada, Interior, Inserto... Si solo hay un componente puede dejar el nombre 'Impresión'.</p>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block font-bold text-gray-800 mb-1">Páginas del componente:</label>
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                            <div className="relative w-full sm:w-64">
+                                                <input
+                                                    type="number"
+                                                    list="pageOptions"
+                                                    value={formData.pages}
+                                                    onChange={(e) => setFormData({ ...formData, pages: e.target.value })}
+                                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                                    placeholder="Seleccione o escriba..."
+                                                />
+                                                <datalist id="pageOptions">
+                                                    {generatePageOptions().map(num => (
+                                                        <option key={num} value={num} />
+                                                    ))}
+                                                </datalist>
+                                            </div>
+                                            <p className="text-sm text-gray-500 italic">Si el número deseado no está en la lista, escríbalo directamente en el cuadro.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="mt-8">
+                                    <h4 className="font-bold text-teal-700 mb-2">Casos especiales:</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-teal-600">
+                                        <div>
+                                            <p className="font-semibold italic mb-1">Cuadernos con tapa impresa:</p>
+                                            <p>Coloque el interior como el primer componente. Una vez que se muestre el presupuesto / OT, haga clic en el enlace "Más opciones" y cambie el tipo de papel a "Impresión de libros autocopiativos".</p>
+                                        </div>
+                                        <div>
+                                            <p className="font-semibold italic mb-1">Otros impresos NO paginados:</p>
+                                            <p>Para todos los demás trabajos con componentes impresos NO paginados, seleccione "2" en el campo "Páginas del componente".</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+
+                        {step === 2 && formData.workType === 'sets' && (
+                            <>
+                                <div className="mb-6 pb-4 border-b border-gray-200">
+                                    <p className="text-gray-600 mb-2">Indique el tipo de talonario.</p>
+                                </div>
+
+                                <div className="space-y-4 mb-8">
+                                    <label className="flex items-center space-x-3 cursor-pointer">
                                         <input
                                             type="radio"
-                                            name="workType"
-                                            value={type.id}
-                                            checked={formData.workType === type.id}
-                                            onChange={(e) => setFormData({ ...formData, workType: e.target.value })}
-                                            className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                                            name="checkbookType"
+                                            value="carbonless"
+                                            checked={formData.checkbookType === 'carbonless'}
+                                            onChange={(e) => setFormData({ ...formData, checkbookType: e.target.value })}
+                                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                                         />
-                                        <div>
-                                            <span className="block font-medium text-gray-900">{type.label}</span>
-                                            {type.description && (
-                                                <span className="block text-sm text-gray-500">{type.description}</span>
-                                            )}
-                                        </div>
+                                        <span className="text-gray-900 font-medium">Talonario autocopiativo (juegos de hojas)</span>
                                     </label>
-                                ))}
-                            </div>
-                        </>
-                    )}
 
-                    {step === 2 && (formData.workType === 'general' || formData.workType === 'plotter' || formData.workType === 'copies') && (
-                        <>
-                            <p className="text-gray-600 mb-6">Indique el formato del trabajo terminado (cortado, pero sin plegar).</p>
-
-                            <div className="mb-4">
-                                <label className="block font-bold text-gray-800 mb-2">Formato final (abierto):</label>
-                                <div className="flex items-center space-x-4">
-                                    <select
-                                        value={formData.format}
-                                        onChange={(e) => setFormData({ ...formData, format: e.target.value })}
-                                        className="block w-64 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
-                                    >
-                                        <option disabled value="">&lt;Unidades&gt;</option>
-                                        {formats.map(f => (
-                                            <option key={f.value} value={f.value}>{f.label}</option>
-                                        ))}
-                                    </select>
-                                    <span className="text-sm text-gray-500 font-bold">(Recuerde que todas las medidas están en centímetros.)</span>
-                                </div>
-                            </div>
-
-                            {formData.format === 'custom' && (
-                                <div className="ml-0 mt-2 p-4 bg-gray-50 rounded-md border border-gray-200 inline-block">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Especifique dimensiones (cm):</label>
-                                    <input
-                                        type="text"
-                                        value={formData.customFormat}
-                                        onChange={(e) => setFormData({ ...formData, customFormat: e.target.value })}
-                                        placeholder="Ej: 16x11"
-                                        className="block w-64 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
-                                    />
-                                </div>
-                            )}
-
-                            <div className="mt-8">
-                                <p className="text-gray-500 text-sm mb-2">Si el formato deseado no está en la lista, escríbalo directamente en el cuadro. Por ejemplo: 16x11.</p>
-                                <p className="text-gray-500 text-sm italic mb-2">Opcionalmente, puede añadir el nombre del formato (al principio).</p>
-                                <p className="text-gray-500 text-sm italic">Los formatos más usados en sus trabajos se añaden automáticamente a la lista.</p>
-                            </div>
-                        </>
-                    )}
-
-                    {step === 2 && formData.workType === 'paginated' && (
-                        <>
-                            <div className="mb-6 pb-4 border-b border-gray-200">
-                                <p className="text-gray-600 mb-2">Los trabajos paginados pueden tener varios componentes impresos (segmentos). Por ejemplo: portada, interior, inserto, etc.</p>
-                                <p className="text-gray-600">Asigne un nombre a este componente impreso e indique el número de páginas.</p>
-                            </div>
-
-                            <div className="space-y-6">
-                                <div>
-                                    <label className="block font-bold text-gray-800 mb-1">Nombre del Componente:</label>
-                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                    <label className="flex items-center space-x-3 cursor-pointer">
                                         <input
-                                            type="text"
-                                            value={formData.componentName}
-                                            onChange={(e) => setFormData({ ...formData, componentName: e.target.value })}
-                                            className="block w-full sm:w-64 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                            type="radio"
+                                            name="checkbookType"
+                                            value="simple"
+                                            checked={formData.checkbookType === 'simple'}
+                                            onChange={(e) => setFormData({ ...formData, checkbookType: e.target.value })}
+                                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                                         />
-                                        <p className="text-sm text-gray-500 italic">Por ejemplo: Portada, Interior, Inserto... Si solo hay un componente puede dejar el nombre 'Impresión'.</p>
-                                    </div>
+                                        <span className="text-gray-900 font-medium">Talonario no autocopiativo (Simple)</span>
+                                    </label>
                                 </div>
 
-                                <div>
-                                    <label className="block font-bold text-gray-800 mb-1">Páginas del componente:</label>
-                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                                        <div className="relative w-full sm:w-64">
-                                            <input
-                                                type="number"
-                                                list="pageOptions"
-                                                value={formData.pages}
-                                                onChange={(e) => setFormData({ ...formData, pages: e.target.value })}
-                                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
-                                                placeholder="Seleccione o escriba..."
-                                            />
-                                            <datalist id="pageOptions">
-                                                {generatePageOptions().map(num => (
-                                                    <option key={num} value={num} />
-                                                ))}
-                                            </datalist>
+                                <div className="mt-8">
+                                    <h4 className="font-bold text-teal-700 mb-2">Blocs de notas, cuadernos y otros talonarios con tapa impresa:</h4>
+                                    <div className="text-sm text-teal-600">
+                                        <p>Para preparar estos presupuestos / OT use la opción de impresos paginados, colocando el interior como el primer componente. Una vez mostrado el presupuesto / OT haga clic en el enlace "Más opciones" y cambie el tipo de impresión a "Impresión de libros no autocopiativos".</p>
+                                    </div>
+                                    <div className="mt-4 flex justify-end">
+                                        {/* Placeholder for icon */}
+                                        <div className="hidden sm:block">
+                                            <BookOpen className="h-16 w-16 text-teal-200 rotate-12" />
                                         </div>
-                                        <p className="text-sm text-gray-500 italic">Si el número deseado no está en la lista, escríbalo directamente en el cuadro.</p>
                                     </div>
                                 </div>
-                            </div>
+                            </>
+                        )}
 
-                            <div className="mt-8">
-                                <h4 className="font-bold text-teal-700 mb-2">Casos especiales:</h4>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-teal-600">
+                        {step === 2 && formData.workType === 'free' && (
+                            <>
+                                <div className="space-y-6">
+                                    {/* Customer Selection */}
                                     <div>
-                                        <p className="font-semibold italic mb-1">Cuadernos con tapa impresa:</p>
-                                        <p>Coloque el interior como el primer componente. Una vez que se muestre el presupuesto / OT, haga clic en el enlace "Más opciones" y cambie el tipo de papel a "Impresión de libros autocopiativos".</p>
-                                    </div>
-                                    <div>
-                                        <p className="font-semibold italic mb-1">Otros impresos NO paginados:</p>
-                                        <p>Para todos los demás trabajos con componentes impresos NO paginados, seleccione "2" en el campo "Páginas del componente".</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </>
-                    )}
-
-                    {step === 2 && formData.workType === 'sets' && (
-                        <>
-                            <div className="mb-6 pb-4 border-b border-gray-200">
-                                <p className="text-gray-600 mb-2">Indique el tipo de talonario.</p>
-                            </div>
-
-                            <div className="space-y-4 mb-8">
-                                <label className="flex items-center space-x-3 cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        name="checkbookType"
-                                        value="carbonless"
-                                        checked={formData.checkbookType === 'carbonless'}
-                                        onChange={(e) => setFormData({ ...formData, checkbookType: e.target.value })}
-                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                                    />
-                                    <span className="text-gray-900 font-medium">Talonario autocopiativo (juegos de hojas)</span>
-                                </label>
-
-                                <label className="flex items-center space-x-3 cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        name="checkbookType"
-                                        value="simple"
-                                        checked={formData.checkbookType === 'simple'}
-                                        onChange={(e) => setFormData({ ...formData, checkbookType: e.target.value })}
-                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                                    />
-                                    <span className="text-gray-900 font-medium">Talonario no autocopiativo (Simple)</span>
-                                </label>
-                            </div>
-
-                            <div className="mt-8">
-                                <h4 className="font-bold text-teal-700 mb-2">Blocs de notas, cuadernos y otros talonarios con tapa impresa:</h4>
-                                <div className="text-sm text-teal-600">
-                                    <p>Para preparar estos presupuestos / OT use la opción de impresos paginados, colocando el interior como el primer componente. Una vez mostrado el presupuesto / OT haga clic en el enlace "Más opciones" y cambie el tipo de impresión a "Impresión de libros no autocopiativos".</p>
-                                </div>
-                                <div className="mt-4 flex justify-end">
-                                    {/* Placeholder for icon */}
-                                    <div className="hidden sm:block">
-                                        <BookOpen className="h-16 w-16 text-teal-200 rotate-12" />
-                                    </div>
-                                </div>
-                            </div>
-                        </>
-                    )}
-
-                    {step === 2 && formData.workType === 'free' && (
-                        <>
-                            <div className="space-y-6">
-                                {/* Customer Selection */}
-                                <div>
-                                    <label className="block font-bold text-gray-800 mb-1">Cliente:</label>
-                                    <div className="relative max-w-lg">
-                                        <input
-                                            type="text"
-                                            list="customerOptions"
-                                            value={formData.customerSearch}
-                                            onChange={(e) => {
-                                                const val = e.target.value;
-                                                const matchedCustomer = customers.find(c => c.name === val);
-                                                setFormData({
-                                                    ...formData,
-                                                    customerSearch: val,
-                                                    customerId: matchedCustomer ? matchedCustomer.id : ''
-                                                });
-                                            }}
-                                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
-                                            placeholder="Escriba para buscar cliente..."
-                                        />
-                                        <datalist id="customerOptions">
-                                            {customers.map(c => (
-                                                <option key={c.id} value={c.name} />
-                                            ))}
-                                        </datalist>
-                                        <div className="mt-1 text-xs text-gray-500">
-                                            Puede indicar el código (ID) o escribir parte del nombre del cliente para filtrar.
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Copies */}
-                                <div>
-                                    <label className="block font-bold text-gray-800 mb-1">Ejemplares (Copias):</label>
-                                    <div className="relative max-w-xs">
-                                        <input
-                                            type="number"
-                                            list="copiesOptions"
-                                            value={formData.copies}
-                                            onChange={(e) => setFormData({ ...formData, copies: e.target.value })}
-                                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
-                                        />
-                                        <datalist id="copiesOptions">
-                                            {[1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000].map(n => (
-                                                <option key={n} value={n} />
-                                            ))}
-                                        </datalist>
-                                    </div>
-                                </div>
-
-                                {/* Product */}
-                                <div>
-                                    <label className="block font-bold text-gray-800 mb-1">Producto:</label>
-                                    <select
-                                        value={formData.product}
-                                        onChange={(e) => setFormData({ ...formData, product: e.target.value })}
-                                        className="block max-w-lg w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
-                                    >
-                                        {products.map(p => (
-                                            <option key={p} value={p}>{p}</option>
-                                        ))}
-                                    </select>
-                                    <p className="mt-1 text-xs text-gray-500">
-                                        Opcionalmente, seleccione el tipo de producto. Recuerde que puede configurar su lista de productos desde la pantalla de inicio.
-                                    </p>
-                                </div>
-                            </div>
-                        </>
-                    )}
-
-                    {step === 3 && formData.workType === 'general' && (
-                        <>
-                            <p className="text-gray-600 mb-6">Indique el número de tintas (frente + dorso).</p>
-
-                            <div className="space-y-6">
-                                <div>
-                                    <label className="block font-bold text-gray-800 mb-2">Tintas:</label>
-                                    <div className="flex items-center space-x-4">
-                                        <div className="relative w-full sm:w-64">
-                                            <input
-                                                type="text"
-                                                list="inkOptions"
-                                                value={formData.inks}
-                                                onChange={(e) => setFormData({ ...formData, inks: e.target.value })}
-                                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 text-blue-600 font-bold"
-                                                placeholder="Ej: 4+0"
-                                            />
-                                            <datalist id="inkOptions">
-                                                {inkOptions.map(opt => (
-                                                    <option key={opt} value={opt} />
-                                                ))}
-                                            </datalist>
-                                        </div>
-                                        <span className="text-gray-900 font-bold">(Frente + dorso)</span>
-                                    </div>
-                                </div>
-
-                                <div className="text-gray-600 text-sm space-y-2">
-                                    <p>Por ejemplo, "4+1" indica 4 tintas en el frente y 1 en el dorso.</p>
-                                    <p className="italic text-gray-500">Si las tintas deseadas no están en la lista, escríbalo directamente en el cuadro. Por ejemplo: "5+4"</p>
-                                </div>
-
-                                <div className="mt-8 flex items-center space-x-6">
-                                    <div className="h-24 w-24 bg-gray-100 flex items-center justify-center rounded-lg overflow-hidden border">
-                                        {/* Color wheel representation */}
-                                        <div className="grid grid-cols-2 h-full w-full rotate-45 scale-150">
-                                            <div className="bg-cyan-400"></div>
-                                            <div className="bg-magenta-500"></div>
-                                            <div className="bg-yellow-300"></div>
-                                            <div className="bg-black"></div>
-                                        </div>
-                                    </div>
-                                    <div className="text-sm text-gray-700 space-y-3">
-                                        <p className="font-bold">Puede introducir posteriormente el Pantone u otros detalles en la descripción ampliada del trabajo.</p>
-                                        <p className="italic text-gray-400">Si lo desea, podrá modificar el número de tintas y otros datos más adelante.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </>
-                    )}
-
-                    {step === 4 && formData.workType === 'general' && (
-                        <>
-                            <div className="flex justify-between items-start mb-6">
-                                <div className="flex-grow">
-                                    <p className="text-gray-600 mb-2">Indique el papel o soporte de impresión.</p>
-                                </div>
-                                <div className="hidden lg:block ml-4">
-                                    {/* Placeholder for scroll image */}
-                                    <div className="h-20 w-20 bg-amber-50 rounded-full flex items-center justify-center border border-amber-100 rotate-12 shadow-sm">
-                                        <div className="h-12 w-12 bg-amber-100 rounded-sm"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="space-y-6 max-w-3xl">
-                                {/* Paper Type */}
-                                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
-                                    <label className="lg:col-span-3 font-bold text-gray-800 text-sm lg:text-base">Papel o soporte:</label>
-                                    <div className="lg:col-span-4 relative" ref={paperDropdownRef}>
-                                        <div className="relative">
-                                            <input
-                                                type="text"
-                                                value={formData.paperType}
-                                                placeholder="Escriba o seleccione un papel..."
-                                                onChange={(e) => {
-                                                    const newVal = e.target.value;
-                                                    const exactMatch = STANDARD_PAPERS[newVal];
-
-                                                    setFormData({
-                                                        ...formData,
-                                                        paperType: newVal,
-                                                        grammage: exactMatch ? (exactMatch.defaultGrammage || '<Search>') : formData.grammage,
-                                                        paperDimensions: exactMatch ? (exactMatch.defaultSize || '<Propose>') : formData.paperDimensions
-                                                    });
-                                                    setIsPaperDropdownOpen(true);
-                                                }}
-                                                onFocus={() => setIsPaperDropdownOpen(true)}
-                                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 pr-10"
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => setIsPaperDropdownOpen(!isPaperDropdownOpen)}
-                                                className="absolute inset-y-0 right-0 px-2 flex items-center text-gray-400 hover:text-gray-600"
-                                            >
-                                                <ChevronDown className="h-4 w-4" />
-                                            </button>
-                                        </div>
-
-                                        {isPaperDropdownOpen && (
-                                            <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                                                {(() => {
-                                                    const isExactMatch = availablePapers.includes(formData.paperType);
-                                                    const filtered = isExactMatch
-                                                        ? availablePapers
-                                                        : availablePapers.filter(p =>
-                                                            !formData.paperType ||
-                                                            p.toLowerCase().includes(formData.paperType.toLowerCase())
-                                                        );
-
-                                                    if (filtered.length === 0) {
-                                                        return (
-                                                            <li className="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-500 italic">
-                                                                No se encontraron resultados
-                                                            </li>
-                                                        );
-                                                    }
-
-                                                    return filtered.map(p => (
-                                                        <li
-                                                            key={p}
-                                                            className={`relative cursor-default select-none py-2 pl-3 pr-9 hover:bg-blue-100 text-gray-900 ${formData.paperType === p ? 'bg-blue-50 font-medium' : ''}`}
-                                                            onClick={() => {
-                                                                const defaults = STANDARD_PAPERS[p] || {};
-                                                                setFormData({
-                                                                    ...formData,
-                                                                    paperType: p,
-                                                                    grammage: defaults.defaultGrammage || '<Search>',
-                                                                    paperDimensions: defaults.defaultSize || '<Propose>'
-                                                                });
-                                                                setIsPaperDropdownOpen(false);
-                                                            }}
-                                                        >
-                                                            {p}
-                                                        </li>
-                                                    ));
-                                                })()}
-                                            </ul>
-                                        )}
-                                        {/* Simplified Logic for List Rendering: Always show filtered list, BUT if user clicks chevron, toggle open. 
-                                            The issue is standard behavior: if I type 'B', I see 'Bond'. If I click chevron, I want to see 'Acid Free', 'Bond', etc?
-                                            Let's implement: If I am editing, filter. If I am just viewing (exact match), show all?
-                                            Better: Show all availablePapers if Filtered list is empty? No.
-                                            Let's just show filtered list. If user wants to see all, they delete text. 
-                                            Wait, "hasta que no borre el contenido". 
-                                            How about a "Clear" button?
-                                            Or: If the input matches a valid option EXACTLY, show ALL options? 
-                                            Let's try: If (exact match) -> Show All. Else -> Show Filtered.
-                                        */}
-                                    </div>
-                                    <div className="lg:col-span-5 text-sm text-gray-500 italic">
-                                        Elija de la lista, o escriba, el tipo de papel o soporte. <br />
-                                        (Para impresión en continuo elija un soporte bobina, al final de la lista desplegable)
-                                    </div>
-                                </div>
-
-                                {/* Grammage */}
-                                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
-                                    <label className="lg:col-span-3 font-bold text-gray-800 text-sm lg:text-base">Gramaje:</label>
-                                    <div className="lg:col-span-4">
-                                        <select
-                                            value={formData.grammage}
-                                            onChange={(e) => setFormData({ ...formData, grammage: e.target.value })}
-                                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
-                                        >
-                                            {getGrammagesForPaper(formData.paperType).map(g => (
-                                                <option key={g} value={g}>{g}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="lg:col-span-5 text-sm text-gray-500 italic">
-                                        Para buscar el gramaje introducido en la ficha del Artículo, seleccione el valor "&lt;Buscar&gt;". Si es un soporte donde el gramaje no es importante, seleccione el valor "&lt;-&gt;".
-                                    </div>
-                                </div>
-
-                                {/* Dimensions */}
-                                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
-                                    <label className="lg:col-span-3 font-bold text-gray-800 text-sm lg:text-base">Dimensiones:</label>
-                                    <div className="lg:col-span-4">
-                                        <select
-                                            value={formData.paperDimensions}
-                                            onChange={(e) => setFormData({ ...formData, paperDimensions: e.target.value })}
-                                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
-                                        >
-                                            {getDimensionsForPaper(formData.paperType).map(d => (
-                                                <option key={d} value={d}>{d}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="lg:col-span-5 text-sm text-gray-500 italic">
-                                        Elija de la lista las dimensiones originales del papel o soporte (sin cortar). Opcionalmente, puede dejar que el software proponga (recomendado).
-                                    </div>
-                                </div>
-                            </div>
-                        </>
-                    )}
-
-                    {step === 5 && formData.workType === 'general' && (
-                        <>
-                            <div className="flex justify-between items-start mb-6">
-                                <div className="flex-grow">
-                                    <p className="text-gray-600 mb-2">Indique el formato de máquina a la entrada de máquina. (Opcionalmente, el software puede proponerlo)</p>
-                                </div>
-                                <div className="hidden lg:block ml-4">
-                                    {/* Placeholder for old press image */}
-                                    <div className="h-24 w-24 bg-sepia-100 rounded-lg flex items-center justify-center border border-sepia-200 shadow-sm opacity-80">
-                                        <Printer className="h-16 w-16 text-amber-900 opacity-60" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="space-y-8 max-w-3xl">
-                                {/* Press Format */}
-                                <div>
-                                    <label className="block font-bold text-gray-800 mb-2">Formato de máquina ({unitLabel}):</label>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-                                        <select
-                                            value={formData.pressFormat}
-                                            onChange={(e) => setFormData({ ...formData, pressFormat: e.target.value })}
-                                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
-                                        >
-                                            {pressFormatOptions.map(opt => (
-                                                <option key={opt} value={opt}>{opt}</option>
-                                            ))}
-                                        </select>
-                                        <p className="text-sm text-gray-500 italic">Si las dimensiones deseadas no están en la lista, escríbalo directamente en el cuadro.</p>
-                                    </div>
-                                </div>
-
-                                <div className="border-t border-gray-200 pt-6">
-                                    <p className="text-gray-600 mb-4">Introduzca la máquina para imprimir el trabajo. (Opcionalmente, puede dejar que el software proponga.)</p>
-
-                                    {/* Printing Machine */}
-                                    <div>
-                                        <label className="block font-bold text-gray-800 mb-2">Máquina de impresión:</label>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-                                            <select
-                                                value={formData.printingMachine}
-                                                onChange={(e) => setFormData({ ...formData, printingMachine: e.target.value })}
-                                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
-                                            >
-                                                <option value="<Propose>">&lt;Propose&gt;</option>
-                                                {getMachinesForFormat(formData.pressFormat).map(m => (
-                                                    <option key={m.id} value={m.name}>{m.name}</option>
-                                                ))}
-                                            </select>
-                                            <p className="text-sm text-gray-500 italic">Muestra las máquinas configuradas actualmente. Si no ha introducido los datos de sus máquinas, se mostrarán algunas por defecto.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </>
-                    )}
-
-                    {step === 6 && formData.workType === 'general' && (
-                        <>
-                            <div className="flex justify-between items-start mb-6">
-                                <div className="flex-grow">
-                                    <p className="text-gray-600 mb-2">Finalmente, indique el cliente y la cantidad de copias.</p>
-                                </div>
-                                <div className="hidden lg:block ml-4">
-                                    <div className="h-24 w-24 bg-blue-50 rounded-lg flex items-center justify-center border border-blue-100 shadow-sm">
-                                        <Layers className="h-16 w-16 text-blue-400 opacity-60" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="space-y-6 max-w-3xl">
-                                {/* Customer Selection - Simplified */}
-                                <div>
-                                    <label className="block font-bold text-gray-800 mb-1">Cliente:</label>
-                                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                                        <div className="relative w-full sm:w-96">
+                                        <label className="block font-bold text-gray-800 mb-1">Cliente:</label>
+                                        <div className="relative max-w-lg">
                                             <input
                                                 type="text"
                                                 list="customerOptions"
@@ -873,33 +618,24 @@ const QuoteWizard = ({
                                                         customerId: matchedCustomer ? matchedCustomer.id : ''
                                                     });
                                                 }}
-                                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 pl-10"
-                                                placeholder="Buscar cliente por nombre..."
+                                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                                placeholder="Escriba para buscar cliente..."
                                             />
-                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                {/* Search Icon */}
-                                                <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-                                                </svg>
-                                            </div>
                                             <datalist id="customerOptions">
-                                                {/* Filter customers if needed, or show all */}
-                                                {filteredCustomers.map(c => (
+                                                {customers.map(c => (
                                                     <option key={c.id} value={c.name} />
                                                 ))}
                                             </datalist>
-                                        </div>
-                                        <div className="text-sm text-gray-500 italic hidden sm:block">
-                                            Puede indicar el código (ID) o escribir parte del nombre del cliente.
+                                            <div className="mt-1 text-xs text-gray-500">
+                                                Puede indicar el código (ID) o escribir parte del nombre del cliente para filtrar.
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                {/* Copies */}
-                                <div>
-                                    <label className="block font-bold text-gray-800 mb-1">Ejemplares (Copias):</label>
-                                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                                        <div className="relative w-full sm:w-64">
+                                    {/* Copies */}
+                                    <div>
+                                        <label className="block font-bold text-gray-800 mb-1">Ejemplares (Copias):</label>
+                                        <div className="relative max-w-xs">
                                             <input
                                                 type="number"
                                                 list="copiesOptions"
@@ -908,61 +644,426 @@ const QuoteWizard = ({
                                                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
                                             />
                                             <datalist id="copiesOptions">
-                                                {[1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000].map(n => (
+                                                {[1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000].map(n => (
                                                     <option key={n} value={n} />
                                                 ))}
                                             </datalist>
                                         </div>
-                                        <div className="text-sm text-gray-500 italic hidden sm:block">
-                                            Más tarde podrá cambiar esta cantidad o calcular escalados.
-                                        </div>
                                     </div>
-                                </div>
 
-                                {/* Product */}
-                                <div>
-                                    <label className="block font-bold text-gray-800 mb-1">Producto:</label>
-                                    <div className="w-full sm:w-64">
+                                    {/* Product */}
+                                    <div>
+                                        <label className="block font-bold text-gray-800 mb-1">Producto:</label>
                                         <select
                                             value={formData.product}
                                             onChange={(e) => setFormData({ ...formData, product: e.target.value })}
-                                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                            className="block max-w-lg w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
                                         >
                                             {products.map(p => (
                                                 <option key={p} value={p}>{p}</option>
                                             ))}
                                         </select>
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            Opcionalmente, seleccione el tipo de producto. Recuerde que puede configurar su lista de productos desde la pantalla de inicio.
+                                        </p>
                                     </div>
-                                    <p className="mt-1 text-xs text-gray-500">
-                                        Opcionalmente, seleccione el tipo de producto. Recuerde que puede configurar su lista de productos desde la pantalla de inicio.
-                                    </p>
                                 </div>
-                            </div>
-                        </>
-                    )}
+                            </>
+                        )}
 
-                </div>
+                        {step === 3 && formData.workType === 'general' && (
+                            <>
+                                <p className="text-gray-600 mb-6">Indique el número de tintas (frente + dorso).</p>
 
-                <div className="mt-8 flex justify-end space-x-3 pt-4 border-t">
-                    <button
-                        onClick={step === 1 ? onClose : handleBack}
-                        className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 text-sm font-medium"
-                    >
-                        {step === 1 ? 'Cancelar' : '<< Anterior'}
-                    </button>
-                    <button
-                        onClick={handleNext}
-                        disabled={isNextDisabled()}
-                        className={`px-4 py-2 rounded-md text-sm font-medium flex items-center ${isNextDisabled()
-                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                            : 'bg-blue-600 text-white hover:bg-blue-700'
-                            }`}
-                    >
-                        {step === 6 || (step === 2 && formData.workType === 'free') ? 'Terminar' : 'Siguiente >>'}
-                    </button>
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="block font-bold text-gray-800 mb-2">Tintas:</label>
+                                        <div className="flex items-center space-x-4">
+                                            <div className="relative w-full sm:w-64">
+                                                <input
+                                                    type="text"
+                                                    list="inkOptions"
+                                                    value={formData.inks}
+                                                    onChange={(e) => setFormData({ ...formData, inks: e.target.value })}
+                                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 text-blue-600 font-bold"
+                                                    placeholder="Ej: 4+0"
+                                                />
+                                                <datalist id="inkOptions">
+                                                    {inkOptions.map(opt => (
+                                                        <option key={opt} value={opt} />
+                                                    ))}
+                                                </datalist>
+                                            </div>
+                                            <span className="text-gray-900 font-bold">(Frente + dorso)</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="text-gray-600 text-sm space-y-2">
+                                        <p>Por ejemplo, "4+1" indica 4 tintas en el frente y 1 en el dorso.</p>
+                                        <p className="italic text-gray-500">Si las tintas deseadas no están en la lista, escríbalo directamente en el cuadro. Por ejemplo: "5+4"</p>
+                                    </div>
+
+                                    <div className="mt-8 flex items-center space-x-6">
+                                        <div className="h-24 w-24 bg-gray-100 flex items-center justify-center rounded-lg overflow-hidden border">
+                                            {/* Color wheel representation */}
+                                            <div className="grid grid-cols-2 h-full w-full rotate-45 scale-150">
+                                                <div className="bg-cyan-400"></div>
+                                                <div className="bg-magenta-500"></div>
+                                                <div className="bg-yellow-300"></div>
+                                                <div className="bg-black"></div>
+                                            </div>
+                                        </div>
+                                        <div className="text-sm text-gray-700 space-y-3">
+                                            <p className="font-bold">Puede introducir posteriormente el Pantone u otros detalles en la descripción ampliada del trabajo.</p>
+                                            <p className="italic text-gray-400">Si lo desea, podrá modificar el número de tintas y otros datos más adelante.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+
+                        {step === 4 && formData.workType === 'general' && (
+                            <>
+                                <div className="flex justify-between items-start mb-6">
+                                    <div className="flex-grow">
+                                        <p className="text-gray-600 mb-2">Indique el papel o soporte de impresión.</p>
+                                    </div>
+                                    <div className="hidden lg:block ml-4">
+                                        {/* Placeholder for scroll image */}
+                                        <div className="h-20 w-20 bg-amber-50 rounded-full flex items-center justify-center border border-amber-100 rotate-12 shadow-sm">
+                                            <div className="h-12 w-12 bg-amber-100 rounded-sm"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-6 max-w-3xl">
+                                    {/* Paper Type */}
+                                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+                                        <label className="lg:col-span-3 font-bold text-gray-800 text-sm lg:text-base">Papel o soporte:</label>
+                                        <div className="lg:col-span-4 relative" ref={paperDropdownRef}>
+                                            <div className="relative">
+                                                <input
+                                                    type="text"
+                                                    value={formData.paperType}
+                                                    placeholder="Escriba o seleccione un papel..."
+                                                    onChange={(e) => {
+                                                        const newVal = e.target.value;
+                                                        const exactMatch = STANDARD_PAPERS[newVal];
+
+                                                        setFormData({
+                                                            ...formData,
+                                                            paperType: newVal,
+                                                            grammage: exactMatch ? (exactMatch.defaultGrammage || '<Search>') : formData.grammage,
+                                                            paperDimensions: exactMatch ? (exactMatch.defaultSize || '<Propose>') : formData.paperDimensions
+                                                        });
+                                                        setIsPaperDropdownOpen(true);
+                                                    }}
+                                                    onFocus={() => setIsPaperDropdownOpen(true)}
+                                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 pr-10"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setIsPaperDropdownOpen(!isPaperDropdownOpen)}
+                                                    className="absolute inset-y-0 right-0 px-2 flex items-center text-gray-400 hover:text-gray-600"
+                                                >
+                                                    <ChevronDown className="h-4 w-4" />
+                                                </button>
+                                            </div>
+
+                                            {isPaperDropdownOpen && (
+                                                <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                                                    {(() => {
+                                                        const isExactMatch = availablePapers.includes(formData.paperType);
+                                                        const filtered = isExactMatch
+                                                            ? availablePapers
+                                                            : availablePapers.filter(p =>
+                                                                !formData.paperType ||
+                                                                p.toLowerCase().includes(formData.paperType.toLowerCase())
+                                                            );
+
+                                                        if (filtered.length === 0) {
+                                                            return (
+                                                                <li className="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-500 italic">
+                                                                    No se encontraron resultados
+                                                                </li>
+                                                            );
+                                                        }
+
+                                                        return filtered.map(p => (
+                                                            <li
+                                                                key={p}
+                                                                className={`relative cursor-default select-none py-2 pl-3 pr-9 hover:bg-blue-100 text-gray-900 ${formData.paperType === p ? 'bg-blue-50 font-medium' : ''}`}
+                                                                onClick={() => {
+                                                                    const defaults = STANDARD_PAPERS[p] || {};
+                                                                    setFormData({
+                                                                        ...formData,
+                                                                        paperType: p,
+                                                                        grammage: defaults.defaultGrammage || '<Search>',
+                                                                        paperDimensions: defaults.defaultSize || '<Propose>'
+                                                                    });
+                                                                    setIsPaperDropdownOpen(false);
+                                                                }}
+                                                            >
+                                                                {p}
+                                                            </li>
+                                                        ));
+                                                    })()}
+                                                </ul>
+                                            )}
+                                            {/* Simplified Logic for List Rendering: Always show filtered list, BUT if user clicks chevron, toggle open. 
+                                            The issue is standard behavior: if I type 'B', I see 'Bond'. If I click chevron, I want to see 'Acid Free', 'Bond', etc?
+                                            Let's implement: If I am editing, filter. If I am just viewing (exact match), show all?
+                                            Better: Show all availablePapers if Filtered list is empty? No.
+                                            Let's just show filtered list. If user wants to see all, they delete text. 
+                                            Wait, "hasta que no borre el contenido". 
+                                            How about a "Clear" button?
+                                            Or: If the input matches a valid option EXACTLY, show ALL options? 
+                                            Let's try: If (exact match) -> Show All. Else -> Show Filtered.
+                                        */}
+                                        </div>
+                                        <div className="lg:col-span-5 text-sm text-gray-500 italic">
+                                            Elija de la lista, o escriba, el tipo de papel o soporte. <br />
+                                            (Para impresión en continuo elija un soporte bobina, al final de la lista desplegable)
+                                        </div>
+                                    </div>
+
+                                    {/* Grammage */}
+                                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+                                        <label className="lg:col-span-3 font-bold text-gray-800 text-sm lg:text-base">Gramaje:</label>
+                                        <div className="lg:col-span-4">
+                                            <select
+                                                value={formData.grammage}
+                                                onChange={(e) => setFormData({ ...formData, grammage: e.target.value })}
+                                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                            >
+                                                {getGrammagesForPaper(formData.paperType).map(g => (
+                                                    <option key={g} value={g}>{g}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="lg:col-span-5 text-sm text-gray-500 italic">
+                                            Para buscar el gramaje introducido en la ficha del Artículo, seleccione el valor "&lt;Buscar&gt;". Si es un soporte donde el gramaje no es importante, seleccione el valor "&lt;-&gt;".
+                                        </div>
+                                    </div>
+
+                                    {/* Dimensions */}
+                                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+                                        <label className="lg:col-span-3 font-bold text-gray-800 text-sm lg:text-base">Dimensiones:</label>
+                                        <div className="lg:col-span-4">
+                                            <select
+                                                value={formData.paperDimensions}
+                                                onChange={(e) => setFormData({ ...formData, paperDimensions: e.target.value })}
+                                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                            >
+                                                {getDimensionsForPaper(formData.paperType).map(d => (
+                                                    <option key={d} value={d}>{d}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="lg:col-span-5 text-sm text-gray-500 italic">
+                                            Elija de la lista las dimensiones originales del papel o soporte (sin cortar). Opcionalmente, puede dejar que el software proponga (recomendado).
+                                        </div>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+
+                        {step === 5 && formData.workType === 'general' && (
+                            <>
+                                <div className="flex justify-between items-start mb-6">
+                                    <div className="flex-grow">
+                                        <p className="text-gray-600 mb-2">Indique el formato de máquina a la entrada de máquina. (Opcionalmente, el software puede proponerlo)</p>
+                                    </div>
+                                    <div className="hidden lg:block ml-4">
+                                        {/* Placeholder for old press image */}
+                                        <div className="h-24 w-24 bg-sepia-100 rounded-lg flex items-center justify-center border border-sepia-200 shadow-sm opacity-80">
+                                            <Printer className="h-16 w-16 text-amber-900 opacity-60" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-8 max-w-3xl">
+                                    {/* Press Format */}
+                                    <div>
+                                        <label className="block font-bold text-gray-800 mb-2">Formato de máquina ({unitLabel}):</label>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                                            <select
+                                                value={formData.pressFormat}
+                                                onChange={(e) => setFormData({ ...formData, pressFormat: e.target.value })}
+                                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                            >
+                                                {pressFormatOptions.map(opt => (
+                                                    <option key={opt} value={opt}>{opt}</option>
+                                                ))}
+                                            </select>
+                                            <p className="text-sm text-gray-500 italic">Si las dimensiones deseadas no están en la lista, escríbalo directamente en el cuadro.</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="border-t border-gray-200 pt-6">
+                                        <p className="text-gray-600 mb-4">Introduzca la máquina para imprimir el trabajo. (Opcionalmente, puede dejar que el software proponga.)</p>
+
+                                        {/* Printing Machine */}
+                                        <div>
+                                            <label className="block font-bold text-gray-800 mb-2">Máquina de impresión:</label>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                                                <select
+                                                    value={formData.printingMachine}
+                                                    onChange={(e) => setFormData({ ...formData, printingMachine: e.target.value })}
+                                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                                >
+                                                    <option value="<Propose>">&lt;Propose&gt;</option>
+                                                    {getMachinesForFormat(formData.pressFormat).map(m => (
+                                                        <option key={m.id} value={m.name}>{m.name}</option>
+                                                    ))}
+                                                </select>
+                                                <p className="text-sm text-gray-500 italic">Muestra las máquinas configuradas actualmente. Si no ha introducido los datos de sus máquinas, se mostrarán algunas por defecto.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+
+                        {step === 6 && formData.workType === 'general' && (
+                            <>
+                                <div className="flex justify-between items-start mb-6">
+                                    <div className="flex-grow">
+                                        <p className="text-gray-600 mb-2">Finalmente, indique el cliente y la cantidad de copias.</p>
+                                    </div>
+                                    <div className="hidden lg:block ml-4">
+                                        <div className="h-24 w-24 bg-blue-50 rounded-lg flex items-center justify-center border border-blue-100 shadow-sm">
+                                            <Layers className="h-16 w-16 text-blue-400 opacity-60" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-6 max-w-3xl">
+                                    {/* Customer Selection - Simplified */}
+                                    <div>
+                                        <label className="block font-bold text-gray-800 mb-1">Cliente:</label>
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                            <div className="relative w-full sm:w-96">
+                                                <input
+                                                    type="text"
+                                                    list="customerOptions"
+                                                    value={formData.customerSearch}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        const matchedCustomer = customers.find(c => c.name === val);
+                                                        setFormData({
+                                                            ...formData,
+                                                            customerSearch: val,
+                                                            customerId: matchedCustomer ? matchedCustomer.id : ''
+                                                        });
+                                                    }}
+                                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 pl-10"
+                                                    placeholder="Buscar cliente por nombre..."
+                                                />
+                                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                    {/* Search Icon */}
+                                                    <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                                                    </svg>
+                                                </div>
+                                                <datalist id="customerOptions">
+                                                    {/* Filter customers if needed, or show all */}
+                                                    {filteredCustomers.map(c => (
+                                                        <option key={c.id} value={c.name} />
+                                                    ))}
+                                                </datalist>
+                                            </div>
+                                            <div className="text-sm text-gray-500 italic hidden sm:block">
+                                                Puede indicar el código (ID) o escribir parte del nombre del cliente.
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Copies */}
+                                    <div>
+                                        <label className="block font-bold text-gray-800 mb-1">Ejemplares (Copias):</label>
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                            <div className="relative w-full sm:w-64">
+                                                <input
+                                                    type="number"
+                                                    list="copiesOptions"
+                                                    value={formData.copies}
+                                                    onChange={(e) => setFormData({ ...formData, copies: e.target.value })}
+                                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                                />
+                                                <datalist id="copiesOptions">
+                                                    {[1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000].map(n => (
+                                                        <option key={n} value={n} />
+                                                    ))}
+                                                </datalist>
+                                            </div>
+                                            <div className="text-sm text-gray-500 italic hidden sm:block">
+                                                Más tarde podrá cambiar esta cantidad o calcular escalados.
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Product */}
+                                    <div>
+                                        <label className="block font-bold text-gray-800 mb-1">Producto:</label>
+                                        <div className="w-full sm:w-64">
+                                            <select
+                                                value={formData.product}
+                                                onChange={(e) => setFormData({ ...formData, product: e.target.value })}
+                                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                            >
+                                                {products.map(p => (
+                                                    <option key={p} value={p}>{p}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            Opcionalmente, seleccione el tipo de producto. Recuerde que puede configurar su lista de productos desde la pantalla de inicio.
+                                        </p>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+
+                    </div>
+
+                    <div className="mt-8 flex justify-end space-x-3 pt-4 border-t">
+                        <button
+                            onClick={step === 1 ? onClose : handleBack}
+                            className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 text-sm font-medium"
+                        >
+                            {step === 1 ? 'Cancelar' : '<< Anterior'}
+                        </button>
+                        <button
+                            onClick={handleNext}
+                            disabled={isNextDisabled()}
+                            className={`px-4 py-2 rounded-md text-sm font-medium flex items-center ${isNextDisabled()
+                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                : 'bg-blue-600 text-white hover:bg-blue-700'
+                                }`}
+                        >
+                            {step === 6 || (step === 2 && formData.workType === 'free') ? 'Terminar' : 'Siguiente >>'}
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
+
+            {/* Cost Analysis Modal */}
+            <CostAnalysisModal
+                isOpen={showCostAnalysis}
+                onClose={() => setShowCostAnalysis(false)}
+                wizardData={formData}
+                onMachineSelected={handleMachineSelected}
+            />
+
+            {/* Quote Details Modal */}
+            <QuoteDetailsModal
+                isOpen={showQuoteDetails}
+                onClose={() => setShowQuoteDetails(false)}
+                quoteData={enrichedQuoteData}
+                onSave={handleQuoteSave}
+            />
+        </>
     );
 };
 
