@@ -4,6 +4,7 @@ import { Pencil, Trash2, Plus, Search, FileText } from 'lucide-react';
 
 import Modal from '../Components/Modal';
 import QuoteWizard from '../Components/QuoteWizard';
+import QuoteDetailsModal from '../Components/QuoteDetailsModal';
 import { Head } from '@inertiajs/react';
 
 const Quotes = () => {
@@ -13,11 +14,17 @@ const Quotes = () => {
     const [materials, setMaterials] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [currentQuote, setCurrentQuote] = useState(null);
 
     const handleOpenModal = (quote = null) => {
         setCurrentQuote(quote);
         setIsModalOpen(true);
+    };
+
+    const handleOpenViewModal = (quote) => {
+        setCurrentQuote(quote);
+        setIsViewModalOpen(true);
     };
 
     const handleCloseModal = () => {
@@ -141,7 +148,7 @@ const Quotes = () => {
                                     <button
                                         className="text-gray-600 hover:text-gray-900 mr-4"
                                         title="Ver Detalles"
-                                        onClick={() => alert("Vista de detalles en desarrollo...")}
+                                        onClick={() => handleOpenViewModal(quote)}
                                     >
                                         <FileText className="h-5 w-5" />
                                     </button>
@@ -181,6 +188,18 @@ const Quotes = () => {
                     materials={materials}
                 />
             </Modal>
+
+            {isViewModalOpen && currentQuote && (
+                <QuoteDetailsModal
+                    isOpen={isViewModalOpen}
+                    onClose={() => {
+                        setIsViewModalOpen(false);
+                        setCurrentQuote(null);
+                    }}
+                    quoteData={currentQuote}
+                    isReadOnly={true}
+                />
+            )}
         </div >
     );
 };

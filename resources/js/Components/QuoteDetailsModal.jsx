@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, FileText, Calculator } from 'lucide-react';
 
-const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
+const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave, isReadOnly = false }) => {
     const [details, setDetails] = useState({
         customer_id: '',
         customer_name: '',
@@ -36,47 +36,79 @@ const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
 
     useEffect(() => {
         if (isOpen && quoteData) {
-            // Populate details from wizard + selected machine
-            const machine = quoteData.selectedMachine || {};
+            if (quoteData.id) {
+                // Backend quote
+                setDetails({
+                    customer_id: quoteData.customer_id,
+                    customer_name: quoteData.customer?.name || '',
+                    description: quoteData.title || '',
+                    state: quoteData.state,
+                    copies: parseInt(quoteData.copies) || 0,
+                    finish_format: quoteData.finish_format || '',
+                    inks: quoteData.inks || '',
+                    pages: quoteData.pages || '',
+                    press_format: quoteData.press_format || '',
+                    machine_name: quoteData.machine_id ? `Máquina ID: ${quoteData.machine_id}` : '',
+                    machine_id: quoteData.machine_id,
+                    paper_type: quoteData.paper_type || '',
+                    grammage: quoteData.grammage || '',
+                    paper_dimensions: quoteData.paper_dimensions || '',
+                    manufacturer: quoteData.manufacturer || '',
+                    article_id: quoteData.article_id || '',
+                    cost_materials: parseFloat(quoteData.cost_materials) || 0,
+                    cost_operations: parseFloat(quoteData.cost_operations) || 0,
+                    total_cost: parseFloat(quoteData.total_cost) || 0,
+                    margin: parseFloat(quoteData.margin) || 0,
+                    profit: parseFloat(quoteData.profit) || 0,
+                    unit_price: parseFloat(quoteData.unit_price) || 0,
+                    total_amount: parseFloat(quoteData.total_amount) || 0,
+                    notes: quoteData.notes || ''
+                });
+            } else {
+                // Populate details from wizard + selected machine
+                const machine = quoteData.selectedMachine || {};
 
-            setDetails({
-                customer_id: quoteData.customerId || '',
-                customer_name: quoteData.customerSearch || '',
-                description: quoteData.product || 'GENERAL',
-                state: 'Draft',
-                copies: parseInt(quoteData.copies) || 0,
+                setDetails({
+                    customer_id: quoteData.customerId || '',
+                    customer_name: quoteData.customerSearch || '',
+                    description: quoteData.product || 'GENERAL',
+                    state: 'Draft',
+                    copies: parseInt(quoteData.copies) || 0,
 
-                finish_format: quoteData.format || '',
-                inks: quoteData.inks || '',
-                pages: quoteData.pages || '',
-                press_format: quoteData.pressFormat || machine.press_format || '',
-                machine_name: machine.machine_name || quoteData.printingMachine || '',
-                machine_id: machine.machine_id || null,
-                paper_type: quoteData.paperType || '',
-                grammage: quoteData.grammage || '',
-                paper_dimensions: quoteData.paperDimensions || machine.paper_size || '',
-                manufacturer: 'Domtar Paper',
-                article_id: machine.media_id || '',
+                    finish_format: quoteData.format || '',
+                    inks: quoteData.inks || '',
+                    pages: quoteData.pages || '',
+                    press_format: quoteData.pressFormat || machine.press_format || '',
+                    machine_name: machine.machine_name || quoteData.printingMachine || '',
+                    machine_id: machine.machine_id || null,
+                    paper_type: quoteData.paperType || '',
+                    grammage: quoteData.grammage || '',
+                    paper_dimensions: quoteData.paperDimensions || machine.paper_size || '',
+                    manufacturer: 'Domtar Paper',
+                    article_id: machine.media_id || '',
 
-                cost_materials: parseFloat(machine.cost || 0) * 0.5,
-                cost_operations: parseFloat(machine.cost || 0) * 0.5,
-                total_cost: parseFloat(machine.cost || 0),
-                margin: 40,
-                profit: 0,
-                unit_price: 0,
-                total_amount: 0,
+                    cost_materials: parseFloat(machine.cost || 0) * 0.5,
+                    cost_operations: parseFloat(machine.cost || 0) * 0.5,
+                    total_cost: parseFloat(machine.cost || 0),
+                    margin: 40,
+                    profit: 0,
+                    unit_price: 0,
+                    total_amount: 0,
 
-                notes: ''
-            });
+                    notes: ''
+                });
 
-            // Trigger initial calculation
-            setTimeout(() => handleRecalculate(), 100);
+                // Trigger initial calculation
+                setTimeout(() => handleRecalculate(), 100);
+            }
         }
     }, [isOpen, quoteData]);
 
     // Auto-recalculate when cost, margin, or copies change
     useEffect(() => {
-        handleRecalculate();
+        if (!isReadOnly && !quoteData?.id) {
+            handleRecalculate();
+        }
     }, [details.total_cost, details.margin, details.copies]);
 
     const handleRecalculate = () => {
@@ -364,15 +396,15 @@ const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
                                 <div className="mt-4 pt-4 border-t border-blue-200 space-y-2">
                                     <div className="flex justify-between items-center">
                                         <span className="text-sm text-gray-700">Beneficio:</span>
-                                        <span className="text-sm font-semibold">{details.profit}</span>
+                                        <span className="text-sm font-semibold">{parseFloat(details.profit).toFixed(2)}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
                                         <span className="text-sm text-gray-700">P/U:</span>
-                                        <span className="text-sm font-semibold">{details.unit_price}</span>
+                                        <span className="text-sm font-semibold">{parseFloat(details.unit_price).toFixed(4)}</span>
                                     </div>
                                     <div className="flex justify-between items-center pt-2 border-t border-blue-200">
                                         <span className="text-base font-bold text-gray-800">Monto total:</span>
-                                        <span className="text-lg font-bold text-blue-700">{details.total_amount}</span>
+                                        <span className="text-lg font-bold text-blue-700">{parseFloat(details.total_amount).toFixed(2)}</span>
                                     </div>
                                 </div>
                             </div>
@@ -380,19 +412,21 @@ const QuoteDetailsModal = ({ isOpen, onClose, quoteData, onSave }) => {
                     </div>
                 </div>
 
-                {/* Footer */}
-                <div className="flex justify-end items-center gap-3 p-4 border-t bg-gray-50 flex-shrink-0">
-                    <button
-                        onClick={handleSave}
-                        className="px-8 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
-                    >
-                        OK
-                    </button>
+                {/* Footer Actions */}
+                <div className="p-4 border-t bg-gray-50 flex justify-end gap-3 flex-shrink-0">
+                    {!isReadOnly && (
+                        <button
+                            onClick={handleSave}
+                            className="px-8 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
+                        >
+                            Guardar Presupuesto
+                        </button>
+                    )}
                     <button
                         onClick={onClose}
                         className="px-8 py-2 bg-white border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-medium"
                     >
-                        Cancelar
+                        {isReadOnly ? 'Cerrar' : 'Cancelar'}
                     </button>
                 </div>
             </div>
