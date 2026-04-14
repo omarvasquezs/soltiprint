@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import MainLayout from '@/Layouts/MainLayout';
 import { Pencil, Trash2, Plus, Search } from 'lucide-react';
 import Modal from '../Components/Modal';
+import axios from 'axios';
 
 const Materials = () => {
     const [materials, setMaterials] = useState([]);
@@ -26,25 +27,25 @@ const Materials = () => {
         fetchSuppliers();
     }, []);
 
-    const fetchMaterials = () => {
+    const fetchMaterials = async () => {
         setLoading(true);
-        fetch('/api/materials')
-            .then(response => response.json())
-            .then(data => {
-                setMaterials(data);
-                setLoading(false);
-            })
-            .catch(error => {
-                console.error('Error fetching materials:', error);
-                setLoading(false);
-            });
+        try {
+            const response = await axios.get('/api/materials');
+            setMaterials(response.data);
+        } catch (error) {
+            console.error('Error fetching materials:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const fetchSuppliers = () => {
-        fetch('/api/suppliers')
-            .then(res => res.json())
-            .then(data => setSuppliers(data))
-            .catch(err => console.error('Error fetching suppliers:', err));
+    const fetchSuppliers = async () => {
+        try {
+            const response = await axios.get('/api/suppliers');
+            setSuppliers(response.data);
+        } catch (error) {
+            console.error('Error fetching suppliers:', error);
+        }
     };
 
     const handleOpenModal = (material = null) => {
@@ -88,40 +89,30 @@ const Materials = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const url = currentMaterial ? `/api/materials/${currentMaterial.id}` : '/api/materials';
-        const method = currentMaterial ? 'PUT' : 'POST';
+        const method = currentMaterial ? 'put' : 'post';
 
-        fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            },
-            body: JSON.stringify(formData),
-        })
-            .then(response => {
-                if (!response.ok) throw new Error('Error saving material');
-                return response.json();
-            })
-            .then(() => {
-                fetchMaterials();
-                handleCloseModal();
-            })
-            .catch(error => console.error('Error:', error));
+        try {
+            await axios[method](url, formData);
+            fetchMaterials();
+            handleCloseModal();
+        } catch (error) {
+            console.error('Error:', error.response?.data || error);
+            alert(error.response?.data?.message || 'Error guardando el material. Revisa consola.');
+        }
     };
 
-    const handleDelete = (id) => {
+    const handleDelete = async (id) => {
         if (confirm('¿Estás seguro de que quieres eliminar este material?')) {
-            fetch(`/api/materials/${id}`, {
-                method: 'DELETE',
-            })
-                .then(response => {
-                    if (!response.ok) throw new Error('Error deleting material');
-                    fetchMaterials();
-                })
-                .catch(error => console.error('Error:', error));
+            try {
+                await axios.delete(`/api/materials/${id}`);
+                fetchMaterials();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error eliminando material');
+            }
         }
     };
 
