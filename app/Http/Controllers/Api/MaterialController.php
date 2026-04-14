@@ -17,10 +17,11 @@ class MaterialController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|in:paper,ink,plate,other',
+            'type' => 'required|in:paper,ink,plate,chemical,other',
             'cost_per_unit' => 'required|numeric|min:0',
             'unit' => 'required|string|max:50', // e.g., 'sheet', 'kg', 'liter'
-            'stock_quantity' => 'integer|min:0',
+            'stock_quantity' => 'nullable|integer|min:0',
+            'supplier_id' => 'nullable|exists:suppliers,id',
             'grammage' => 'nullable|integer|min:0',
             'width_mm' => 'nullable|integer|min:0',
             'height_mm' => 'nullable|integer|min:0',
@@ -40,10 +41,11 @@ class MaterialController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|in:paper,ink,plate,other',
+            'type' => 'required|in:paper,ink,plate,chemical,other',
             'cost_per_unit' => 'required|numeric|min:0',
             'unit' => 'required|string|max:50',
-            'stock_quantity' => 'integer|min:0',
+            'stock_quantity' => 'nullable|integer|min:0',
+            'supplier_id' => 'nullable|exists:suppliers,id',
             'grammage' => 'nullable|integer|min:0',
             'width_mm' => 'nullable|integer|min:0',
             'height_mm' => 'nullable|integer|min:0',
