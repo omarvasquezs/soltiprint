@@ -4,10 +4,18 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Quote;
+use App\Models\Customer;
+use App\Services\CostingService;
 use Illuminate\Http\Request;
 
 class QuoteController extends Controller
 {
+    protected $costingService;
+
+    public function __construct(CostingService $costingService)
+    {
+        $this->costingService = $costingService;
+    }
     public function index()
     {
         return response()->json(Quote::with('customer')->latest()->get());
@@ -17,28 +25,75 @@ class QuoteController extends Controller
     {
         $validated = $request->validate([
             'customer_id' => 'required|exists:customers,id',
-            'title' => 'required|string|max:255',
-            'margin_percent' => 'numeric|min:0',
-            // Simple total cost input for now, ideally calculated from items
-            'total_cost' => 'numeric|min:0', 
+            'title' => 'nullable|string',
+            'copies' => 'nullable|integer',
+            'state' => 'nullable|string',
+            'total' => 'nullable|numeric',
         ]);
 
-        // Auto-calculate final price
-        $margin = $validated['margin_percent'] ?? 30;
-        $cost = $validated['total_cost'] ?? 0;
-        $finalPrice = $cost * (1 + ($margin / 100));
+        // Get customer for reference
+        $customer = Customer::find($validated['customer_id']);
+
+        // Generate auto-reference like "Quote 5024: Artiz Design"
+        $nextNumber = Quote::max('id') + 1;
+        $reference = "Quote {$nextNumber}: " . ($customer ? $customer->name : 'Unknown');
 
         $quote = Quote::create([
             'customer_id' => $validated['customer_id'],
-            'title' => $validated['title'],
-            'status' => 'draft',
-            'total_cost' => $cost,
-            'margin_percent' => $margin,
-            'final_price' => $finalPrice,
-            'reference' => 'Q-' . time(), // Simple reference generation
+            'reference' => $reference,
+            'title' => $validated['title'] ?? 'GENERAL',
+            'state' => $validated['state'] ?? 'Draft',
+            'copies' => $validated['copies'] ?? 0,
+            'total' => $validated['total'] ?? 0,
+            'status' => 'draft', // keep for backwards compat
+
+            // Work definition fields
+            'finish_format' => $request->input('finish_format'),
+            'inks' => $request->input('inks'),
+            'pages' => $request->input('pages'),
+            'precut' => $request->input('precut'),
+            'printing_type' => $request->input('printing_type'),
+            'press_format' => $request->input('press_format'),
+            'machine_id' => $request->input('machine_id'),
+
+            // Paper details
+            'paper_type' => $request->input('paper_type'),
+            'grammage' => $request->input('grammage'),
+            'paper_dimensions' => $request->input('paper_dimensions'),
+            'manufacturer' => $request->input('manufacturer'),
+            'article_id' => $request->input('article_id'),
+
+            // Financial fields
+            'cost_materials' => $request->input('cost_materials'),
+            'cost_operations' => $request->input('cost_operations'),
+            'total_cost' => $request->input('total_cost'),
+            'margin' => $request->input('margin'),
+            'profit' => $request->input('profit'),
+            'unit_price' => $request->input('unit_price'),
+
+            'notes' => $request->input('notes'),
         ]);
 
         return response()->json($quote->load('customer'), 201);
+    }
+
+    public function analyzeCosts(Request $request)
+    {
+        $quoteData = $request->all();
+
+        try {
+            $machines = $this->costingService->analyzeCosts($quoteData);
+
+            return response()->json([
+                'analysis_id' => rand(1000, 9999),
+                'machines' => $machines,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Cost analysis failed',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function show(Quote $quote)

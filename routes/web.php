@@ -85,6 +85,9 @@ Route::middleware(['auth', 'verified', CheckCompany::class])->group(function () 
         Route::apiResource('customers', \App\Http\Controllers\Api\CustomerController::class);
         Route::apiResource('machines', \App\Http\Controllers\Api\MachineController::class);
         Route::apiResource('materials', \App\Http\Controllers\Api\MaterialController::class);
+
+        // Quote routes
+        Route::post('quotes/analyze-costs', [\App\Http\Controllers\Api\QuoteController::class, 'analyzeCosts']);
         Route::apiResource('quotes', \App\Http\Controllers\Api\QuoteController::class);
         Route::apiResource('work-orders', \App\Http\Controllers\Api\WorkOrderController::class);
 
