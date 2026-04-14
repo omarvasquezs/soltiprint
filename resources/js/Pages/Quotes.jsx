@@ -123,17 +123,38 @@ const Quotes = () => {
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm font-bold text-gray-900">S/ {quote.final_price}</div>
-                                    <div className="text-xs text-gray-500">Costo: S/ {quote.total_cost}</div>
+                                    <div className="text-sm font-bold text-gray-900">
+                                        S/ {quote.total_amount ? parseFloat(quote.total_amount).toFixed(2) : '0.00'}
+                                    </div>
+                                    <div className="text-xs text-gray-500">
+                                        Costo: S/ {quote.total_cost ? parseFloat(quote.total_cost).toFixed(2) : '0.00'}
+                                    </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <button className="text-blue-600 hover:text-blue-900 mr-4" title="Editar">
+                                    <button
+                                        className="text-blue-600 hover:text-blue-900 mr-4"
+                                        title="Editar"
+                                        onClick={() => handleOpenModal(quote)}
+                                    >
                                         <Pencil className="h-5 w-5" />
                                     </button>
-                                    <button className="text-gray-600 hover:text-gray-900 mr-4" title="Ver Detalles">
+                                    <button
+                                        className="text-gray-600 hover:text-gray-900 mr-4"
+                                        title="Ver Detalles"
+                                        onClick={() => alert("Vista de detalles en desarrollo...")}
+                                    >
                                         <FileText className="h-5 w-5" />
                                     </button>
-                                    <button className="text-red-600 hover:text-red-900" title="Eliminar">
+                                    <button
+                                        className="text-red-600 hover:text-red-900"
+                                        title="Eliminar"
+                                        onClick={() => {
+                                            if (window.confirm("¿Está seguro de eliminar este presupuesto?")) {
+                                                fetch(`/api/quotes/${quote.id}`, { method: 'DELETE' })
+                                                    .then(() => setQuotes(quotes.filter(q => q.id !== quote.id)));
+                                            }
+                                        }}
+                                    >
                                         <Trash2 className="h-5 w-5" />
                                     </button>
                                 </td>
