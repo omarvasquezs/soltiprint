@@ -269,30 +269,32 @@ export default function ThirdPartyServices() {
                         </div>
 
                         {/* Stepper Navigation */}
-                        <div className="bg-white px-6 py-4 border-b border-gray-200">
+                        <div className="bg-white px-8 pt-8 pb-6 border-b border-gray-100">
                             <nav aria-label="Progress">
-                                <ol role="list" className="flex items-center justify-between">
+                                <ol role="list" className="flex items-center justify-between w-full relative z-0">
                                     {steps.map((step, stepIdx) => (
-                                        <li key={step.name} className={`relative flex-1 ${stepIdx !== steps.length - 1 ? 'pr-8 sm:pr-20' : ''}`}>
-                                            <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                                                <div className={`h-1 w-full rounded ${step.id < currentStep ? 'bg-indigo-600' : 'bg-gray-200'}`} />
-                                            </div>
+                                        <li key={step.name} className="relative flex flex-col items-center flex-1">
+                                            {/* Connection Line */}
+                                            {stepIdx !== 0 && (
+                                                <div className={`absolute top-5 left-[-50%] w-full h-[2px] -z-10 ${step.id <= currentStep ? 'bg-indigo-600' : 'bg-gray-200'}`} />
+                                            )}
+                                            
                                             <button 
                                                 type="button"
                                                 onClick={() => setCurrentStep(step.id)}
-                                                className={`relative flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors ${
-                                                    step.id < currentStep ? 'border-indigo-600 bg-indigo-600 hover:bg-indigo-700' : 
-                                                    step.id === currentStep ? 'border-indigo-600 bg-white' : 
-                                                    'border-gray-300 bg-white hover:border-gray-400'
+                                                className={`relative flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-200 bg-white z-10 ${
+                                                    step.id < currentStep ? 'border-indigo-600 bg-indigo-600 hover:scale-105 shadow-md' : 
+                                                    step.id === currentStep ? 'border-indigo-600 shadow-md ring-4 ring-indigo-50' : 
+                                                    'border-gray-300 hover:border-gray-400'
                                                 }`}
                                             >
-                                                <svg className={`h-5 w-5 ${step.id < currentStep ? 'text-white' : step.id === currentStep ? 'text-indigo-600' : 'text-gray-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg className={`h-5 w-5 ${step.id < currentStep ? 'text-white' : step.id === currentStep ? 'text-indigo-600' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={step.icon} />
                                                 </svg>
-                                                <span className={`absolute -bottom-6 w-max text-xs font-medium ${step.id === currentStep ? 'text-indigo-600' : 'text-gray-500'}`}>
-                                                    {step.name}
-                                                </span>
                                             </button>
+                                            <span className={`mt-3 text-center text-xs font-bold uppercase tracking-wider ${step.id === currentStep ? 'text-indigo-700' : 'text-gray-500'}`}>
+                                                {step.name}
+                                            </span>
                                         </li>
                                     ))}
                                 </ol>
