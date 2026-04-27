@@ -30,7 +30,15 @@ export default function MainLayout({ children }) {
         { name: 'Clientes', href: '/customers', icon: Users },
         { name: 'Máquinas', href: '/machines', icon: Printer },
         { name: 'Materiales', href: '/materials', icon: Package },
-        { name: 'Presupuestos', href: '/quotes', icon: FileText },
+        { 
+            name: 'Presupuestos', 
+            icon: FileText,
+            children: [
+                { name: 'General', href: '/quotes' },
+                { name: 'Servicio a Terceros', href: '/services/third-party' },
+                { name: 'Servicio Troqueles Láser', href: '/services/laser-die-cuts' },
+            ]
+        },
         { name: 'Órdenes de Trabajo', href: '/work-orders', icon: ClipboardList },
         { name: 'Logística', href: '/logistics', icon: Truck },
         { name: 'Configuración', href: '/configuration', icon: Settings },
