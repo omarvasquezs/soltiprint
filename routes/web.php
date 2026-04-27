@@ -40,6 +40,13 @@ Route::middleware(['auth', 'verified', CheckCompany::class])->group(function () 
     Route::get('/quotes', function () {
         return Inertia::render('Quotes');
     })->name('quotes');
+    Route::get('/services/third-party', function () {
+        return Inertia::render('Services/ThirdParty');
+    })->name('services.third-party');
+    Route::get('/services/laser-die-cuts', function () {
+        return Inertia::render('Services/LaserDieCuts');
+    })->name('services.laser-die-cuts');
+
     Route::get('/work-orders', function () {
         return Inertia::render('WorkOrders');
     })->name('work-orders');
@@ -89,6 +96,11 @@ Route::middleware(['auth', 'verified', CheckCompany::class])->group(function () 
         // Quote routes
         Route::post('quotes/analyze-costs', [\App\Http\Controllers\Api\QuoteController::class, 'analyzeCosts']);
         Route::apiResource('quotes', \App\Http\Controllers\Api\QuoteController::class);
+        
+        // Services routes
+        Route::apiResource('third-party-services', \App\Http\Controllers\Api\ThirdPartyServiceController::class);
+        Route::apiResource('laser-die-cuts', \App\Http\Controllers\Api\LaserDieCutController::class);
+
         Route::apiResource('work-orders', \App\Http\Controllers\Api\WorkOrderController::class);
 
         // Accounting Module
