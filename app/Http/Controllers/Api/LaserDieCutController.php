@@ -32,6 +32,11 @@ class LaserDieCutController extends Controller
 
         $item = LaserDieCut::create($validated);
 
+        if (empty($item->op)) {
+            $item->op = 'OP-LAS-' . str_pad($item->id, 6, '0', STR_PAD_LEFT);
+            $item->save();
+        }
+
         return response()->json($item, 201);
     }
 

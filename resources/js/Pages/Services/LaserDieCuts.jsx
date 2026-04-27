@@ -268,7 +268,7 @@ export default function LaserDieCuts() {
                                 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">OP (N° Orden)</label>
-                                    <input type="text" name="op" value={formData.op} onChange={handleInputChange} className="w-full rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500" />
+                                    <input type="text" name="op" value={formData.op} onChange={handleInputChange} className="w-full rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500" placeholder="Dejar vacío para generar OP automático" />
                                 </div>
 
                                 <div>

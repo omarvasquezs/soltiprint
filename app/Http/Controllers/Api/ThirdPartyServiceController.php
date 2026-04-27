@@ -77,6 +77,12 @@ class ThirdPartyServiceController extends Controller
         ]);
 
         $item = ThirdPartyService::create($validated);
+        
+        if (empty($item->op)) {
+            $item->op = 'OP-TER-' . str_pad($item->id, 6, '0', STR_PAD_LEFT);
+            $item->save();
+        }
+
         return response()->json($item, 201);
     }
 

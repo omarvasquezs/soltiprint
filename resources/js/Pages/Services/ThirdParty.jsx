@@ -310,7 +310,7 @@ export default function ThirdPartyServices() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Orden de Producción (OP)</label>
-                                            <input type="text" name="op" value={formData.op} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" placeholder="Ej. OP-1045" />
+                                            <input type="text" name="op" value={formData.op} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" placeholder="Dejar vacío para generar OP automático" />
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
