@@ -17,12 +17,6 @@ export default function MainLayout({ children }) {
         return url.startsWith(path) && (path === '/accounting' ? url !== '/accounting/invoices' : true);
     };
 
-    const [openMenus, setOpenMenus] = useState({});
-
-    const toggleMenu = (name) => {
-        setOpenMenus(prev => ({ ...prev, [name]: !prev[name] }));
-    };
-
     const navItems = [
         { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
         { name: 'Contabilidad', href: '/accounting', icon: BookOpen },
@@ -43,6 +37,22 @@ export default function MainLayout({ children }) {
         { name: 'Logística', href: '/logistics', icon: Truck },
         { name: 'Configuración', href: '/configuration', icon: Settings },
     ];
+
+    const [openMenus, setOpenMenus] = useState(() => {
+        const initialOpen = {};
+        navItems.forEach(item => {
+            if (item.children) {
+                if (item.children.some(child => url.startsWith(child.href.split('?')[0]))) {
+                    initialOpen[item.name] = true;
+                }
+            }
+        });
+        return initialOpen;
+    });
+
+    const toggleMenu = (name) => {
+        setOpenMenus(prev => ({ ...prev, [name]: !prev[name] }));
+    };
 
     return (
         <div className="flex h-screen bg-gray-100">
