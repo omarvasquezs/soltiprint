@@ -49,7 +49,7 @@ export default function LaserDieCuts() {
                 axios.get('/api/users') // Assuming a users endpoint exists, otherwise we'll fetch from a generic one if needed.
             ]);
             setCustomers(custRes.data);
-            setMaterials(matRes.data.filter(m => m.type === 'plate' || m.type === 'die')); // or all
+            setMaterials(matRes.data);
             // Since we might not have a generic users endpoint exposed yet, let's just leave it empty if it fails.
             if(usersRes && usersRes.data) setUsers(usersRes.data);
         } catch (error) {

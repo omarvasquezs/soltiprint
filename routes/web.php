@@ -92,6 +92,7 @@ Route::middleware(['auth', 'verified', CheckCompany::class])->group(function () 
         Route::apiResource('customers', \App\Http\Controllers\Api\CustomerController::class);
         Route::apiResource('machines', \App\Http\Controllers\Api\MachineController::class);
         Route::apiResource('materials', \App\Http\Controllers\Api\MaterialController::class);
+        Route::apiResource('users', \App\Http\Controllers\Api\UserController::class)->only(['index']);
 
         // Quote routes
         Route::post('quotes/analyze-costs', [\App\Http\Controllers\Api\QuoteController::class, 'analyzeCosts']);
