@@ -23,3 +23,12 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 *.sql
+
+# Office Files
+*.xls
+*.xlsx
+*.doc
+*.docx
+*.ppt
+*.pptx
+*.csv
