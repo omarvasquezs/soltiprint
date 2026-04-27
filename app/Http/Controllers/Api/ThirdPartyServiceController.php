@@ -29,7 +29,8 @@ class ThirdPartyServiceController extends Controller
             'corte_in_s_hora' => 'nullable|numeric',
             'corte_in_s_total' => 'nullable|numeric',
 
-            'impresion' => 'nullable|numeric',
+            'imp_t' => 'nullable|numeric',
+            'imp_r' => 'nullable|numeric',
             'imp_total' => 'nullable|numeric',
             'imp_a_facturar' => 'nullable|numeric',
             'imp_s_millar' => 'nullable|numeric',
@@ -109,7 +110,8 @@ class ThirdPartyServiceController extends Controller
             'corte_in_s_hora' => 'nullable|numeric',
             'corte_in_s_total' => 'nullable|numeric',
 
-            'impresion' => 'nullable|numeric',
+            'imp_t' => 'nullable|numeric',
+            'imp_r' => 'nullable|numeric',
             'imp_total' => 'nullable|numeric',
             'imp_a_facturar' => 'nullable|numeric',
             'imp_s_millar' => 'nullable|numeric',

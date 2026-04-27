@@ -25,7 +25,7 @@ export default function ThirdPartyServices() {
         // 2. Corte Inicial
         corte_in_hora_inicio: '', corte_in_hora_final: '', corte_in_tiempo_total: '', corte_in_s_hora: '', corte_in_s_total: '',
         // 3. Impresión
-        impresion: '', imp_total: '', imp_a_facturar: '', imp_s_millar: '', imp_s_total: '',
+        imp_t: '', imp_r: '', imp_total: '', imp_a_facturar: '', imp_s_millar: '', imp_s_total: '',
         // 4. Barniz
         barniz: '', bar_total: '', bar_s: '', bar_s_millar: '', bar_s_total: '',
         // 5. Corte Final
@@ -119,6 +119,13 @@ export default function ThirdPartyServices() {
                         newData.corte_in_s_total = (totalHours * rate).toFixed(2);
                     }
                 }
+            }
+
+            // Handle Impresion T + R = Total
+            if (['imp_t', 'imp_r'].includes(name)) {
+                const t = parseFloat(newData.imp_t) || 0;
+                const r = parseFloat(newData.imp_r) || 0;
+                newData.imp_total = (t + r).toString();
             }
 
             return newData;
@@ -398,14 +405,18 @@ export default function ThirdPartyServices() {
 
                                     <section>
                                         <h3 className="text-lg font-medium text-gray-900 border-b pb-2 mb-4 text-indigo-800">B. Impresión</h3>
-                                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                                        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
                                             <div>
-                                                <label className="block text-xs text-gray-500 mb-1">Impresión</label>
-                                                <input type="number" step="0.01" name="impresion" value={formData.impresion} onChange={handleInputChange} className="w-full rounded border-gray-300 text-sm" />
+                                                <label className="block text-xs text-gray-500 mb-1">T (Tiraje)</label>
+                                                <input type="number" step="0.01" name="imp_t" value={formData.imp_t} onChange={handleInputChange} className="w-full rounded border-gray-300 text-sm" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs text-gray-500 mb-1">R (Reposición)</label>
+                                                <input type="number" step="0.01" name="imp_r" value={formData.imp_r} onChange={handleInputChange} className="w-full rounded border-gray-300 text-sm" />
                                             </div>
                                             <div>
                                                 <label className="block text-xs text-gray-500 mb-1">Imp. Total</label>
-                                                <input type="number" step="0.01" name="imp_total" value={formData.imp_total} onChange={handleInputChange} className="w-full rounded border-gray-300 text-sm" />
+                                                <input type="number" step="0.01" name="imp_total" value={formData.imp_total} readOnly className="w-full rounded border-gray-200 bg-gray-50 text-sm cursor-not-allowed" />
                                             </div>
                                             <div>
                                                 <label className="block text-xs text-gray-500 mb-1">A Facturar</label>

@@ -30,7 +30,8 @@ return new class extends Migration
             $table->decimal('corte_in_s_total', 12, 4)->nullable();
 
             // 3. Impresión
-            $table->decimal('impresion', 12, 4)->nullable();
+            $table->decimal('imp_t', 12, 4)->nullable();
+            $table->decimal('imp_r', 12, 4)->nullable();
             $table->decimal('imp_total', 12, 4)->nullable();
             $table->decimal('imp_a_facturar', 12, 4)->nullable();
             $table->decimal('imp_s_millar', 10, 4)->nullable();
