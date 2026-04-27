@@ -23,7 +23,7 @@ export default function ThirdPartyServices() {
         // 1. Datos Generales
         op: '', date: '', customer_id: '', material_id: '', details: '', requested_quantity: '',
         // 2. Corte Inicial
-        corte_in: '', corte_in_tiempo_total: '', corte_in_s_hora: '', corte_in_s_total: '',
+        corte_in_hora_inicio: '', corte_in_hora_final: '', corte_in_tiempo_total: '', corte_in_s_hora: '', corte_in_s_total: '',
         // 3. Impresión
         impresion: '', imp_total: '', imp_a_facturar: '', imp_s_millar: '', imp_s_total: '',
         // 4. Barniz
@@ -96,7 +96,33 @@ export default function ThirdPartyServices() {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData(prev => {
+            const newData = { ...prev, [name]: value };
+
+            // Handle time difference and S/ Total for Corte Inicial
+            if (['corte_in_hora_inicio', 'corte_in_hora_final', 'corte_in_s_hora'].includes(name)) {
+                if (newData.corte_in_hora_inicio && newData.corte_in_hora_final) {
+                    const [h1, m1] = newData.corte_in_hora_inicio.split(':').map(Number);
+                    const [h2, m2] = newData.corte_in_hora_final.split(':').map(Number);
+                    
+                    let diffMins = (h2 * 60 + m2) - (h1 * 60 + m1);
+                    if (diffMins < 0) diffMins += 24 * 60; // handle cross midnight just in case
+                    
+                    const hours = Math.floor(diffMins / 60);
+                    const mins = diffMins % 60;
+                    newData.corte_in_tiempo_total = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+                    
+                    // calculate total cost
+                    const rate = parseFloat(newData.corte_in_s_hora);
+                    if (!isNaN(rate)) {
+                        const totalHours = diffMins / 60;
+                        newData.corte_in_s_total = (totalHours * rate).toFixed(2);
+                    }
+                }
+            }
+
+            return newData;
+        });
     };
 
     const calculateTotals = () => {
@@ -346,14 +372,18 @@ export default function ThirdPartyServices() {
                                 <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
                                     <section>
                                         <h3 className="text-lg font-medium text-gray-900 border-b pb-2 mb-4 text-indigo-800">A. Corte Inicial</h3>
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                                             <div>
-                                                <label className="block text-xs text-gray-500 mb-1">Corte In.</label>
-                                                <input type="number" step="0.01" name="corte_in" value={formData.corte_in} onChange={handleInputChange} className="w-full rounded border-gray-300 text-sm" />
+                                                <label className="block text-xs text-gray-500 mb-1">Hora Inicio</label>
+                                                <input type="time" name="corte_in_hora_inicio" value={formData.corte_in_hora_inicio?.substring(0,5)} onChange={handleInputChange} className="w-full rounded border-gray-300 text-sm" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs text-gray-500 mb-1">Hora Final</label>
+                                                <input type="time" name="corte_in_hora_final" value={formData.corte_in_hora_final?.substring(0,5)} onChange={handleInputChange} className="w-full rounded border-gray-300 text-sm" />
                                             </div>
                                             <div>
                                                 <label className="block text-xs text-gray-500 mb-1">Tiempo Total</label>
-                                                <input type="number" step="0.01" name="corte_in_tiempo_total" value={formData.corte_in_tiempo_total} onChange={handleInputChange} className="w-full rounded border-gray-300 text-sm" />
+                                                <input type="text" readOnly name="corte_in_tiempo_total" value={formData.corte_in_tiempo_total} className="w-full rounded border-gray-200 bg-gray-50 text-sm cursor-not-allowed" placeholder="HH:MM" />
                                             </div>
                                             <div>
                                                 <label className="block text-xs text-gray-500 mb-1">S/ Hora</label>
@@ -361,7 +391,7 @@ export default function ThirdPartyServices() {
                                             </div>
                                             <div>
                                                 <label className="block text-xs font-bold text-gray-700 mb-1">S/ TOTAL</label>
-                                                <input type="number" step="0.01" name="corte_in_s_total" value={formData.corte_in_s_total} onChange={handleInputChange} className="w-full rounded border-indigo-300 bg-indigo-50 font-bold text-sm" />
+                                                <input type="number" step="0.01" name="corte_in_s_total" value={formData.corte_in_s_total} readOnly className="w-full rounded border-indigo-300 bg-indigo-50 font-bold text-sm cursor-not-allowed" />
                                             </div>
                                         </div>
                                     </section>

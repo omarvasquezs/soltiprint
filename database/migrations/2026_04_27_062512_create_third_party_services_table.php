@@ -23,8 +23,9 @@ return new class extends Migration
             $table->integer('requested_quantity')->nullable(); // CANTIDAD SOLICITADA
 
             // 2. Corte Inicial
-            $table->decimal('corte_in', 12, 4)->nullable(); 
-            $table->decimal('corte_in_tiempo_total', 10, 4)->nullable();
+            $table->time('corte_in_hora_inicio')->nullable(); 
+            $table->time('corte_in_hora_final')->nullable(); 
+            $table->string('corte_in_tiempo_total')->nullable();
             $table->decimal('corte_in_s_hora', 10, 4)->nullable();
             $table->decimal('corte_in_s_total', 12, 4)->nullable();
 

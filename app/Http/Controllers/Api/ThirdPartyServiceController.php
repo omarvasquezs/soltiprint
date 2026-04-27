@@ -23,8 +23,9 @@ class ThirdPartyServiceController extends Controller
             'details' => 'nullable|string',
             'requested_quantity' => 'nullable|integer',
             
-            'corte_in' => 'nullable|numeric',
-            'corte_in_tiempo_total' => 'nullable|numeric',
+            'corte_in_hora_inicio' => 'nullable|date_format:H:i',
+            'corte_in_hora_final' => 'nullable|date_format:H:i',
+            'corte_in_tiempo_total' => 'nullable|string',
             'corte_in_s_hora' => 'nullable|numeric',
             'corte_in_s_total' => 'nullable|numeric',
 
@@ -102,8 +103,9 @@ class ThirdPartyServiceController extends Controller
             'details' => 'nullable|string',
             'requested_quantity' => 'nullable|integer',
             
-            'corte_in' => 'nullable|numeric',
-            'corte_in_tiempo_total' => 'nullable|numeric',
+            'corte_in_hora_inicio' => 'nullable|date_format:H:i',
+            'corte_in_hora_final' => 'nullable|date_format:H:i',
+            'corte_in_tiempo_total' => 'nullable|string',
             'corte_in_s_hora' => 'nullable|numeric',
             'corte_in_s_total' => 'nullable|numeric',
 
